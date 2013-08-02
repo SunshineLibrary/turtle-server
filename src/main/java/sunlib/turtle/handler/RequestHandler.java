@@ -11,7 +11,6 @@ import javax.inject.Singleton;
  * Date: 13-8-2
  */
 
-@Singleton
 public interface RequestHandler {
     
     public ApiResponse handleRequest(ApiRequest request);

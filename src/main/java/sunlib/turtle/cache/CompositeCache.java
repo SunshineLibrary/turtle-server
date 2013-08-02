@@ -4,6 +4,7 @@ import sunlib.turtle.cache.data.DataCache;
 import sunlib.turtle.cache.file.FileCache;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.File;
 
 /**
@@ -12,6 +13,7 @@ import java.io.File;
  * Date: 13-8-2
  */
 
+@Singleton
 public class CompositeCache implements Cache{
 
     @Inject DataCache mDataCache;

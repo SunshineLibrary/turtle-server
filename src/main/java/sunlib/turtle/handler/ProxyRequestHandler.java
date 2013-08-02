@@ -2,7 +2,6 @@ package sunlib.turtle.handler;
 
 import sunlib.turtle.ApiRequest;
 import sunlib.turtle.ApiResponse;
-import sunlib.turtle.handler.RequestHandler;
 
 import javax.inject.Singleton;
 
@@ -11,6 +10,7 @@ import javax.inject.Singleton;
  * User: Bowen
  * Date: 13-8-2
  */
+
 @Singleton
 public class ProxyRequestHandler implements RequestHandler {
 

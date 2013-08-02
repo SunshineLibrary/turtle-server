@@ -4,11 +4,15 @@ import com.google.inject.Inject;
 import sunlib.turtle.ApiRequest;
 import sunlib.turtle.ApiResponse;
 
+import javax.inject.Singleton;
+
 /**
  * Created with IntelliJ IDEA.
  * User: Bowen
  * Date: 13-8-2
  */
+
+@Singleton
 public class CompositeRequestHandler implements RequestHandler {
 
     private static enum RequestType { Get, Proxy, Manifest};

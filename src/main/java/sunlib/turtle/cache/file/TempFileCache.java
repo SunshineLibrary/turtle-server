@@ -1,5 +1,6 @@
 package sunlib.turtle.cache.file;
 
+import javax.inject.Singleton;
 import java.io.File;
 
 /**
@@ -7,6 +8,8 @@ import java.io.File;
  * User: Bowen
  * Date: 13-8-2
  */
+
+@Singleton
 public class TempFileCache extends FileCache {
 
     @Override
