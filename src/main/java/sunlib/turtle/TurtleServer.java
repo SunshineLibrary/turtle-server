@@ -1,7 +1,11 @@
 package sunlib.turtle;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.ServerRunner;
+import sunlib.turtle.handler.RequestHandler;
+import sunlib.turtle.module.JavaModule;
 
 import java.util.Map;
 
@@ -10,14 +14,14 @@ import java.util.Map;
  */
 public class TurtleServer extends NanoHTTPD {
 
-    public static Proxy proxy = Proxy.MockProxy;
+    private Injector mInjector;
+    private RequestHandler mRequestHandler;
 
     public TurtleServer() {
         super(8080);
-    }
 
-    public static void main(String[] args) {
-        ServerRunner.run(TurtleServer.class);
+        mInjector = Guice.createInjector(new JavaModule());
+        mRequestHandler = mInjector.getInstance(RequestHandler.class);
     }
 
     @Override
@@ -26,10 +30,12 @@ public class TurtleServer extends NanoHTTPD {
         System.out.println("URL:" + uri);
         System.out.println("PARAMS:" + parms);
 
-        ApiResponse resp = proxy.doRequest(new ApiRequest(uri)
-                .param("id", parms.get("id")));
+        ApiResponse resp = mRequestHandler.handleRequest(new ApiRequest(uri).param("id", parms.get("id")));
 
         return new Response(resp.getData());
-//        return new Response("turtle is born for web app running offline");
+    }
+
+    public static void main(String[] args) {
+        ServerRunner.run(TurtleServer.class);
     }
 }

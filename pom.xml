@@ -22,6 +22,22 @@
         <version>3.8.1</version>
         <scope>test</scope>
     </dependency>
+    <dependency>
+        <groupId>org.springframework.android</groupId>
+        <artifactId>spring-android-rest-template</artifactId>
+        <version>1.0.1.RELEASE</version>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework.android</groupId>
+        <artifactId>spring-android-rest-template</artifactId>
+        <version>1.0.1.RELEASE</version>
+    </dependency>
+    <dependency>
+        <groupId>com.google.inject</groupId>
+        <artifactId>guice</artifactId>
+        <version>3.0</version>
+        <classifier>no_aop</classifier>
+    </dependency>
 </dependencies>
 
 <build>
