@@ -35,7 +35,6 @@ public class SimpleWebServer extends NanoHTTPD {
         put("exe", "application/octet-stream");
         put("class", "application/octet-stream");
     }};
-
     /**
      * The distribution licence
      */
@@ -64,7 +63,6 @@ public class SimpleWebServer extends NanoHTTPD {
                     + "THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT\n"
                     + "(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE\n"
                     + "OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.";
-
     private final File rootDir;
     private final boolean quiet;
 
@@ -72,6 +70,36 @@ public class SimpleWebServer extends NanoHTTPD {
         super(host, port);
         this.rootDir = wwwroot;
         this.quiet = quiet;
+    }
+
+    /**
+     * Starts as a standalone file server and waits for Enter.
+     */
+    public static void main(String[] args) {
+        // Defaults
+        int port = 8080;
+
+        String host = "127.0.0.1";
+        File wwwroot = new File(".").getAbsoluteFile();
+        boolean quiet = false;
+
+        // Parse command-line, with short and long versions of the options.
+        for (int i = 0; i < args.length; ++i) {
+            if (args[i].equalsIgnoreCase("-h") || args[i].equalsIgnoreCase("--host")) {
+                host = args[i + 1];
+            } else if (args[i].equalsIgnoreCase("-p") || args[i].equalsIgnoreCase("--port")) {
+                port = Integer.parseInt(args[i + 1]);
+            } else if (args[i].equalsIgnoreCase("-q") || args[i].equalsIgnoreCase("--quiet")) {
+                quiet = true;
+            } else if (args[i].equalsIgnoreCase("-d") || args[i].equalsIgnoreCase("--dir")) {
+                wwwroot = new File(args[i + 1]).getAbsoluteFile();
+            } else if (args[i].equalsIgnoreCase("--licence")) {
+                System.out.println(LICENCE + "\n");
+                break;
+            }
+        }
+
+        ServerRunner.executeInstance(new SimpleWebServer(host, port, wwwroot, quiet));
     }
 
     File getRootDir() {
@@ -236,11 +264,11 @@ public class SimpleWebServer extends NanoHTTPD {
 
     private String listDirectory(String uri, File f) {
         String heading = "Directory " + uri;
-        String msg = "<html><head><title>" + heading + "</title><style><!--\n"+
-                "span.dirname { font-weight: bold; }\n"+
-                "span.filesize { font-size: 75%; }\n"+
-                "// -->\n"+
-                "</style>"+
+        String msg = "<html><head><title>" + heading + "</title><style><!--\n" +
+                "span.dirname { font-weight: bold; }\n" +
+                "span.filesize { font-size: 75%; }\n" +
+                "// -->\n" +
+                "</style>" +
                 "</head><body><h1>" + heading + "</h1>";
 
         String up = null;
@@ -262,7 +290,7 @@ public class SimpleWebServer extends NanoHTTPD {
         List<String> directories = Arrays.asList(f.list(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
-                return new File (dir, name).isDirectory();
+                return new File(dir, name).isDirectory();
             }
         }));
         Collections.sort(directories);
@@ -326,35 +354,5 @@ public class SimpleWebServer extends NanoHTTPD {
             }
         }
         return serveFile(uri, header, getRootDir());
-    }
-
-    /**
-     * Starts as a standalone file server and waits for Enter.
-     */
-    public static void main(String[] args) {
-        // Defaults
-        int port = 8080;
-
-        String host = "127.0.0.1";
-        File wwwroot = new File(".").getAbsoluteFile();
-        boolean quiet = false;
-
-        // Parse command-line, with short and long versions of the options.
-        for (int i = 0; i < args.length; ++i) {
-            if (args[i].equalsIgnoreCase("-h") || args[i].equalsIgnoreCase("--host")) {
-                host = args[i + 1];
-            } else if (args[i].equalsIgnoreCase("-p") || args[i].equalsIgnoreCase("--port")) {
-                port = Integer.parseInt(args[i + 1]);
-            } else if (args[i].equalsIgnoreCase("-q") || args[i].equalsIgnoreCase("--quiet")) {
-                quiet = true;
-            } else if (args[i].equalsIgnoreCase("-d") || args[i].equalsIgnoreCase("--dir")) {
-                wwwroot = new File(args[i + 1]).getAbsoluteFile();
-            } else if (args[i].equalsIgnoreCase("--licence")) {
-                System.out.println(LICENCE + "\n");
-                break;
-            }
-        }
-
-        ServerRunner.executeInstance(new SimpleWebServer(host, port, wwwroot, quiet));
     }
 }

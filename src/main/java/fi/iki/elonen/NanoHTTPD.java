@@ -142,7 +142,7 @@ public abstract class NanoHTTPD {
                 } while (!myServerSocket.isClosed());
             }
         });
-        myThread.setDaemon(true);
+//        myThread.setDaemon(true);
         myThread.setName("NanoHttpd Main Listener");
         myThread.start();
     }

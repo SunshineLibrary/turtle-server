@@ -1,8 +1,9 @@
 package sunlib.turtle.handler;
 
 import com.google.inject.Inject;
-import sunlib.turtle.ApiRequest;
-import sunlib.turtle.ApiResponse;
+import fi.iki.elonen.NanoHTTPD;
+import sunlib.turtle.models.ApiRequest;
+import sunlib.turtle.models.ApiResponse;
 
 import javax.inject.Singleton;
 
@@ -15,17 +16,22 @@ import javax.inject.Singleton;
 @Singleton
 public class CompositeRequestHandler implements RequestHandler {
 
-    private static enum RequestType { Get, Proxy, Manifest};
-
-    @Inject GetRequestHandler mGetRequestHandler;
-    @Inject ProxyRequestHandler mProxyRequestHandler;
-    @Inject ManifestRequestHandler mManifestRequestHandler;
+    @Inject
+    GetRequestHandler mGetRequestHandler;
+    @Inject
+    PostRequestHandler mPostRequestHandler;
+    @Inject
+    ProxyRequestHandler mProxyRequestHandler;
+    @Inject
+    ManifestRequestHandler mManifestRequestHandler;
 
     @Override
     public ApiResponse handleRequest(ApiRequest request) {
         switch (determineRequestType(request)) {
             case Get:
                 return mGetRequestHandler.handleRequest(request);
+            case Post:
+                return mPostRequestHandler.handleRequest(request);
             case Proxy:
                 return mProxyRequestHandler.handleRequest(request);
             case Manifest:
@@ -46,7 +52,21 @@ public class CompositeRequestHandler implements RequestHandler {
         return null;
     }
 
-    private RequestType determineRequestType(ApiRequest request) {
-        return RequestType.Get;
+    @Override
+    public void stop() {
+
     }
+
+    private RequestType determineRequestType(ApiRequest request) {
+        if (NanoHTTPD.Method.GET.equals(request.method)) {
+            return RequestType.Get;
+        } else {
+            return RequestType.Post;
+        }
+    }
+
+    private static enum RequestType {
+        Get, Post, Proxy, Manifest
+    }
+
 }

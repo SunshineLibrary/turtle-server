@@ -17,7 +17,7 @@ public class AndroidFileCache extends FileCache{
     }
 
     @Override
-    protected void put(String key, File file, int timestamp) {
+    protected void put(String key, File file, long timestamp) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 }

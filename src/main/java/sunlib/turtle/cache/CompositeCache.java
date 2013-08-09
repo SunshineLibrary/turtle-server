@@ -14,10 +14,12 @@ import java.io.File;
  */
 
 @Singleton
-public class CompositeCache implements Cache{
+public class CompositeCache implements Cache {
 
-    @Inject DataCache mDataCache;
-    @Inject FileCache mFileCache;
+    @Inject
+    DataCache mDataCache;
+    @Inject
+    FileCache mFileCache;
 
     @Override
     public Object get(String key) {
@@ -35,7 +37,7 @@ public class CompositeCache implements Cache{
     }
 
     @Override
-    public void put(String key, Object data, int timestamp) {
+    public void put(String key, Object data, long timestamp) {
         if (data instanceof String) {
             mDataCache.put(key, data, timestamp);
         } else if (data instanceof File) {

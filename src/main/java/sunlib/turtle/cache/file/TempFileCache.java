@@ -1,7 +1,11 @@
 package sunlib.turtle.cache.file;
 
+import com.google.common.io.Files;
+import org.apache.commons.lang3.StringUtils;
+
 import javax.inject.Singleton;
 import java.io.File;
+import java.io.IOException;
 
 /**
  * Created with IntelliJ IDEA.
@@ -12,13 +16,31 @@ import java.io.File;
 @Singleton
 public class TempFileCache extends FileCache {
 
-    @Override
-    public File get(String key) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    File tmpFolder = Files.createTempDir();
+
+    public TempFileCache() {
+        super();
+        System.out.println("Temp folder:" + tmpFolder.getAbsolutePath());
     }
 
     @Override
-    protected void put(String key, File file, int timestamp) {
-        //To change body of implemented methods use File | Settings | File Templates.
+    public File get(String key) {
+        File ret = new File(tmpFolder, key);
+        if (!ret.exists()) {
+            ret = null;
+        }
+        return ret;
+    }
+
+    @Override
+    protected void put(String key, File file, long timestamp) {
+        if (StringUtils.isEmpty(key)) {
+            return;
+        }
+        try {
+            Files.move(file, new File(tmpFolder, key));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

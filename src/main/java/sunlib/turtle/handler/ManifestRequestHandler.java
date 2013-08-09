@@ -1,10 +1,7 @@
 package sunlib.turtle.handler;
 
-import com.google.inject.Inject;
-import sunlib.turtle.ApiRequest;
-import sunlib.turtle.ApiResponse;
-import sunlib.turtle.cache.Cache;
-import sunlib.turtle.queue.RequestQueue;
+import sunlib.turtle.models.ApiRequest;
+import sunlib.turtle.models.ApiResponse;
 
 import javax.inject.Singleton;
 
@@ -25,5 +22,10 @@ public class ManifestRequestHandler implements RequestHandler {
     @Override
     public Object fetchResponse(ApiRequest request) {
         return null;
+    }
+
+    @Override
+    public void stop() {
+
     }
 }

@@ -1,9 +1,7 @@
 package sunlib.turtle.handler;
 
-import sunlib.turtle.ApiRequest;
-import sunlib.turtle.ApiResponse;
-
-import javax.inject.Singleton;
+import sunlib.turtle.models.ApiRequest;
+import sunlib.turtle.models.ApiResponse;
 
 /**
  * Created with IntelliJ IDEA.
@@ -12,8 +10,10 @@ import javax.inject.Singleton;
  */
 
 public interface RequestHandler {
-    
+
     public ApiResponse handleRequest(ApiRequest request);
 
     public Object fetchResponse(ApiRequest request);
+
+    public void stop();
 }

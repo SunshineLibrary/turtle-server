@@ -1,14 +1,12 @@
 package sunlib.turtle.queue;
 
 import com.google.inject.Inject;
-import sunlib.turtle.ApiRequest;
 import sunlib.turtle.handler.RequestHandler;
+import sunlib.turtle.models.ApiRequest;
 
 import javax.inject.Singleton;
 import java.util.Queue;
-import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,16 +17,18 @@ import java.util.concurrent.ThreadPoolExecutor;
 @Singleton
 public class MemoryQueue implements RequestQueue {
 
+    @Inject
+    RequestHandler mRequestHandler;
     private Queue<ApiRequest> mRequests;
-    @Inject RequestHandler mRequestHandler;
+    private Thread mThread;
 
     public MemoryQueue() {
         mRequests = new LinkedBlockingQueue<ApiRequest>();
-        new Thread(
+        mThread = new Thread(
                 new Runnable() {
                     @Override
                     public void run() {
-                        while(true) {
+                        while (true) {
                             synchronized (mRequests) {
                                 if (mRequests.isEmpty()) {
                                     try {
@@ -43,12 +43,24 @@ public class MemoryQueue implements RequestQueue {
                         }
                     }
                 }
-        ).start();
+        );
+        mThread.setDaemon(true);
+        mThread.start();
     }
 
     @Override
     public void enqueueRequest(ApiRequest request) {
         mRequests.add(request);
         mRequests.notify();
+    }
+
+    @Override
+    public void stop() {
+        try {
+            //TODO safe close mThead
+            mThread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

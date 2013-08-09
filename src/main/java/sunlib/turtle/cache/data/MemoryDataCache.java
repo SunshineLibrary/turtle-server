@@ -24,7 +24,7 @@ public class MemoryDataCache extends DataCache {
     }
 
     @Override
-    protected void put(String key, String data, int timestamp) {
+    protected void put(String key, String data, long timestamp) {
         mData.put(key, data);
     }
 }

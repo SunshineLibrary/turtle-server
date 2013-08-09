@@ -16,7 +16,7 @@ public class AndroidDataCache extends DataCache{
     }
 
     @Override
-    protected void put(String key, String data, int timestamp) {
+    protected void put(String key, String data, long timestamp) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 }

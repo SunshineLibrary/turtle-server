@@ -13,9 +13,9 @@ public abstract class FileCache implements Cache {
 
     public abstract File get(String key);
 
-    protected abstract void put(String key, File file, int timestamp);
+    protected abstract void put(String key, File file, long timestamp);
 
-    public void put(String key, Object file, int timestamp) {
+    public void put(String key, Object file, long timestamp) {
         put(key, (File) file, timestamp);
     }
 

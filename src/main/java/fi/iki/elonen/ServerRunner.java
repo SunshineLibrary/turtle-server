@@ -19,14 +19,14 @@ public class ServerRunner {
             System.exit(-1);
         }
 
-        System.out.println("Server started, Hit Enter to stop.\n");
-
-        try {
-            System.in.read();
-        } catch (Throwable ignored) {
-        }
-
-        server.stop();
-        System.out.println("Server stopped.\n");
+//        System.out.println("Server started, Hit Enter to stop.\n");
+//
+//        try {
+//            System.in.read();
+//        } catch (Throwable ignored) {
+//        }
+//
+//        server.stop();
+//        System.out.println("Server stopped.\n");
     }
 }

@@ -1,8 +1,6 @@
 package sunlib.turtle.queue;
 
-import sunlib.turtle.ApiRequest;
-
-import javax.inject.Singleton;
+import sunlib.turtle.models.ApiRequest;
 
 /**
  * Created with IntelliJ IDEA.
@@ -14,4 +12,5 @@ public interface RequestQueue {
 
     public void enqueueRequest(ApiRequest request);
 
+    public void stop();
 }

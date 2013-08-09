@@ -1,0 +1,62 @@
+{
+    "title": "typical lesson",
+    "summary": "lesson description",
+    "activities": [
+        {
+            "title": "this is a lecture",
+            "type": "lecture",
+            "redoable": true,
+            "body": "turn to page 1.<video src='video-1.mp4'></video>",
+            "level": "easy"
+        },
+        {
+            "title": "first quiz",
+            "type": "quiz",
+            "body": "a quiz",
+            "problems": [
+                {
+                    "title": "make a choice",
+                    "type": "singlechoice",
+                    "choices": [
+                        {
+                            "body": "the right one",
+                            "is_correct": true
+                        },
+                        {
+                            "body": "the wrong one",
+                            "is_correct": false
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "title": "last quiz",
+            "type": "quiz",
+            "body": "a quiz",
+            "problems": [
+                {
+                    "title": "make a choice",
+                    "type": "singlechoice",
+                    "choices": [
+                        {
+                            "body": "the right one",
+                            "is_correct": true
+                        },
+                        {
+                            "body": "the wrong one",
+                            "is_correct": false
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "title": "reward video",
+            "type": "lecture",
+            "redoable": true,
+            "body": "turn to page 1.<video src='video-1.mp4'></video>",
+            "level": "easy"
+        }
+    ]
+}

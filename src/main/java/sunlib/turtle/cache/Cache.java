@@ -10,5 +10,5 @@ public interface Cache {
 
     public Object get(String key);
 
-    public void put(String key, Object data, int timestamp);
+    public void put(String key, Object data, long timestamp);
 }

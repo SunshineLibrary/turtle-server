@@ -1,6 +1,6 @@
 package sunlib.turtle.queue;
 
-import sunlib.turtle.ApiRequest;
+import sunlib.turtle.models.ApiRequest;
 
 import javax.inject.Singleton;
 
@@ -15,6 +15,11 @@ public class AndroidQueue implements RequestQueue{
 
     @Override
     public void enqueueRequest(ApiRequest request) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void stop() {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 }
