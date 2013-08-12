@@ -1,7 +1,7 @@
 package sunlib.turtle.cache.file;
 
 import com.google.common.io.Files;
-import org.apache.commons.lang3.StringUtils;
+import sunlib.turtle.models.CachedFile;
 
 import javax.inject.Singleton;
 import java.io.File;
@@ -16,29 +16,29 @@ import java.io.IOException;
 @Singleton
 public class TempFileCache extends FileCache {
 
-    File tmpFolder = Files.createTempDir();
+    public static final File tmpFolder = new File("./cached/");
 
     public TempFileCache() {
         super();
+        if (!tmpFolder.exists()) {
+            tmpFolder.mkdir();
+        }
         System.out.println("Temp folder:" + tmpFolder.getAbsolutePath());
     }
 
     @Override
-    public File get(String key) {
+    public CachedFile get(String key) {
         File ret = new File(tmpFolder, key);
         if (!ret.exists()) {
             ret = null;
         }
-        return ret;
+        return new CachedFile(key, ret);
     }
 
     @Override
-    protected void put(String key, File file, long timestamp) {
-        if (StringUtils.isEmpty(key)) {
-            return;
-        }
+    protected void put(CachedFile file) {
         try {
-            Files.move(file, new File(tmpFolder, key));
+            Files.move((File) file.getContent(), new File(tmpFolder, file.getCacheId()));
         } catch (IOException e) {
             e.printStackTrace();
         }

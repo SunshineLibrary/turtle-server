@@ -1,7 +1,8 @@
 package sunlib.turtle.cache.file;
 
+import sunlib.turtle.models.CachedFile;
+
 import javax.inject.Singleton;
-import java.io.File;
 
 /**
  * Created with IntelliJ IDEA.
@@ -10,14 +11,14 @@ import java.io.File;
  */
 
 @Singleton
-public class AndroidFileCache extends FileCache{
+public class AndroidFileCache extends FileCache {
     @Override
-    public File get(String key) {
+    public CachedFile get(String key) {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-    protected void put(String key, File file, long timestamp) {
+    protected void put(CachedFile file) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 }

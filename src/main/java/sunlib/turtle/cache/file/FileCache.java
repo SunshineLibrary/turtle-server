@@ -1,6 +1,8 @@
 package sunlib.turtle.cache.file;
 
 import sunlib.turtle.cache.Cache;
+import sunlib.turtle.models.Cacheable;
+import sunlib.turtle.models.CachedFile;
 
 import java.io.File;
 
@@ -11,12 +13,14 @@ import java.io.File;
  */
 public abstract class FileCache implements Cache {
 
-    public abstract File get(String key);
+    public abstract CachedFile get(String key);
 
-    protected abstract void put(String key, File file, long timestamp);
+    protected abstract void put(CachedFile file);
 
-    public void put(String key, Object file, long timestamp) {
-        put(key, (File) file, timestamp);
+    public void put(Cacheable cacheable) {
+        if (cacheable instanceof CachedFile) {
+            put((CachedFile) cacheable);
+        }
     }
 
 }

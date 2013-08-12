@@ -24,12 +24,13 @@ public class ProxyRequestHandler implements RequestHandler {
 
     @Override
     public Object fetchResponse(ApiRequest request) {
-        String content = null;
+        Object content = null;
         //TODO: change to sync http request
         //TODO for testing /exercise/1/lesson/123 is the json, others redirect to FileCache
         if ("123".equals(request.target.id)) {
             try {
                 content = FileUtils.readFileToString(new File("mockData/lesson.json"));
+//                FileUtils.
             } catch (IOException e) {
                 e.printStackTrace();
             }

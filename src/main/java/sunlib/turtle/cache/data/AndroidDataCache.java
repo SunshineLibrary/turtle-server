@@ -1,5 +1,7 @@
 package sunlib.turtle.cache.data;
 
+import sunlib.turtle.models.CachedText;
+
 import javax.inject.Singleton;
 
 /**
@@ -9,14 +11,15 @@ import javax.inject.Singleton;
  */
 
 @Singleton
-public class AndroidDataCache extends DataCache{
+public class AndroidDataCache extends DataCache {
     @Override
-    public String get(String key) {
+    public CachedText get(String key) {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-    protected void put(String key, String data, long timestamp) {
-        //To change body of implemented methods use File | Settings | File Templates.
+    public void put(CachedText cacheable) {
+
     }
+
 }

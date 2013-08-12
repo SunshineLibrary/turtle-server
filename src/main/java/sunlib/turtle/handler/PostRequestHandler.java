@@ -30,11 +30,11 @@ public class PostRequestHandler implements RequestHandler {
 
     @Override
     public Object fetchResponse(ApiRequest request) {
-        mCache.put(
-                request.target.getCacheId(),
-                request.params.get("data"),
-                (new Date()).getTime()
-        );
+//        mCache.put(
+//                request.target.getCacheId(),
+//                request.params.get("data"),
+//                (new Date()).getTime()
+//        );
         return new ApiResponse(true, null);  //To change body of implemented methods use File | Settings | File Templates.
     }
 

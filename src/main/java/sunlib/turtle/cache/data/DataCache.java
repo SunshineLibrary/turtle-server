@@ -1,6 +1,8 @@
 package sunlib.turtle.cache.data;
 
 import sunlib.turtle.cache.Cache;
+import sunlib.turtle.models.Cacheable;
+import sunlib.turtle.models.CachedText;
 
 /**
  * Created with IntelliJ IDEA.
@@ -9,11 +11,13 @@ import sunlib.turtle.cache.Cache;
  */
 public abstract class DataCache implements Cache {
 
-    public abstract String get(String key);
+    public abstract CachedText get(String key);
 
-    protected abstract void put(String key, String data, long timestamp);
+    protected abstract void put(CachedText text);
 
-    public void put(String key, Object data, long timestamp) {
-        put(key, (String) data, timestamp);
+    public void put(Cacheable cacheable) {
+        if (cacheable instanceof CachedText) {
+            put((CachedText) cacheable);
+        }
     }
 }

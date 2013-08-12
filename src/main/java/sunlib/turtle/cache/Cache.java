@@ -1,5 +1,7 @@
 package sunlib.turtle.cache;
 
+import sunlib.turtle.models.Cacheable;
+
 /**
  * Created with IntelliJ IDEA.
  * User: Bowen
@@ -8,7 +10,7 @@ package sunlib.turtle.cache;
 
 public interface Cache {
 
-    public Object get(String key);
+    public Cacheable get(String key);
 
-    public void put(String key, Object data, long timestamp);
+    public void put(Cacheable cacheable);
 }

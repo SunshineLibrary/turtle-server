@@ -1,5 +1,7 @@
 package sunlib.turtle.cache.data;
 
+import sunlib.turtle.models.CachedText;
+
 import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,12 +21,13 @@ public class MemoryDataCache extends DataCache {
     }
 
     @Override
-    public String get(String key) {
-        return mData.get(key);
+    public CachedText get(String key) {
+//        return mData.get(key);
+        return null;
     }
 
     @Override
-    protected void put(String key, String data, long timestamp) {
-        mData.put(key, data);
+    protected void put(CachedText text) {
+//        mData.put(key, data) ;
     }
 }

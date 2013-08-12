@@ -12,12 +12,15 @@ import sunlib.turtle.handler.RequestHandler;
 import sunlib.turtle.queue.MemoryQueue;
 import sunlib.turtle.queue.RequestQueue;
 
+import java.io.File;
+
 /**
  * Created with IntelliJ IDEA.
  * User: Bowen
  * Date: 13-8-2
  */
 public class JavaModule extends AbstractModule {
+
     @Override
     protected void configure() {
         bind(Cache.class).to(CompositeCache.class);

@@ -26,10 +26,10 @@ public class MaterialFactory {
             Material m = extractor.extract(uri);
             if (m != null) {
                 ret = m;
+                ret.params= params;
                 break;
             }
         }
-        ret.params= params;
         return ret;
     }
 
