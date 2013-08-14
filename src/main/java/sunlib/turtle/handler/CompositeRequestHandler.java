@@ -29,12 +29,26 @@ public class CompositeRequestHandler implements RequestHandler {
     public ApiResponse handleRequest(ApiRequest request) {
         switch (determineRequestType(request)) {
             case Get:
+                // GET  http://127.0.0.1/exercise/subjects/1?ts=123456789
+                // GET  http://127.0.0.1/exercise/chapters/1?ts=123456789
+                // GET  http://127.0.0.1/exercise/lessons/1?ts=123456789
+                // GET  http://127.0.0.1/exercise/lessons/1/%2E%2C%2D.jpg?ts=123456789
+
+                // GET  http://127.0.0.1/pack/subjects/1?ts=123456789
+                // GET  http://127.0.0.1/pack/folders/1?ts=123456789
+                // GET  http://127.0.0.1/pack/pieces/1?ts=123456789
+                // GET  http://127.0.0.1/pack/pieces/1/2e9201af2920ed0192c2.jpg?ts=123456789
                 return mGetRequestHandler.handleRequest(request);
             case Post:
+                // POST http://127.0.0.1/exercise/user_records/subjects/1
                 return mPostRequestHandler.handleRequest(request);
             case Proxy:
+                // GET  http://127.0.0.1/exercise/subjects
+                // GET  http://127.0.0.1/pack/subjects
                 return mProxyRequestHandler.handleRequest(request);
             case Manifest:
+                // GET  http://127.0.0.1/exercise/chapters/1?action=cache
+                // GET  http://127.0.0.1/exercise/chapters/1?action=status
                 return mManifestRequestHandler.handleRequest(request);
             default:
                 return null;
@@ -58,7 +72,7 @@ public class CompositeRequestHandler implements RequestHandler {
     }
 
     private RequestType determineRequestType(ApiRequest request) {
-        if (NanoHTTPD.Method.GET.equals(request.method)) {
+        if (NanoHTTPD.Method.GET == request.method) {
             return RequestType.Get;
         } else {
             return RequestType.Post;

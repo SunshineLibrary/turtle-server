@@ -24,26 +24,7 @@ public class MemoryQueue implements RequestQueue {
 
     public MemoryQueue() {
         mRequests = new LinkedBlockingQueue<ApiRequest>();
-        mThread = new Thread(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        while (true) {
-                            synchronized (mRequests) {
-                                if (mRequests.isEmpty()) {
-                                    try {
-                                        mRequests.wait();
-                                    } catch (InterruptedException e) {
-                                        e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-                                    }
-                                }
-                            }
-                            ApiRequest request = mRequests.remove();
-                            mRequestHandler.fetchResponse(request);
-                        }
-                    }
-                }
-        );
+        mThread = new Thread(new Looper());
         mThread.setDaemon(true);
         mThread.start();
     }
@@ -61,6 +42,25 @@ public class MemoryQueue implements RequestQueue {
             mThread.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
+        }
+    }
+
+    private class Looper implements Runnable {
+        @Override
+        public void run() {
+            while (true) {
+                synchronized (mRequests) {
+                    if (mRequests.isEmpty()) {
+                        try {
+                            mRequests.wait();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                ApiRequest request = mRequests.remove();
+                mRequestHandler.fetchResponse(request);
+            }
         }
     }
 }
