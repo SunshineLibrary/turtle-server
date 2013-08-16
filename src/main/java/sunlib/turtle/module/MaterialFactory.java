@@ -17,7 +17,7 @@ public class MaterialFactory {
 
     public static final List<UriExtractor> extractors = new ArrayList<UriExtractor>() {{
         this.add(new ExerciseMaterialExtractor());
-        this.add(new ExerciseUserdataExtractor());
+        this.add(new ExerciseUserDataExtractor());
     }};
 
     public static Material get(String uri, Map<String, String> params) {
@@ -64,16 +64,16 @@ public class MaterialFactory {
         }
     }
 
-    public static class ExerciseUserdataExtractor extends UriExtractor {
+    public static class ExerciseUserDataExtractor extends UriExtractor {
 
         @Override
         public String getPattern() {
-            return "/exercise/1/userdata//([^/]+)";
+            return "/exercise/1/user_data//([^/]+)";
         }
 
         @Override
         protected Material extractParts(Matcher m) {
-            return new Material("userdata", m.group(1));
+            return new Material("user_data", m.group(1));
         }
     }
 

@@ -21,34 +21,46 @@ public class CompositeRequestHandler implements RequestHandler {
     @Inject
     PostRequestHandler mPostRequestHandler;
     @Inject
-    ProxyRequestHandler mProxyRequestHandler;
-    @Inject
     ManifestRequestHandler mManifestRequestHandler;
 
     @Override
     public ApiResponse handleRequest(ApiRequest request) {
         switch (determineRequestType(request)) {
             case Get:
-                // GET  http://127.0.0.1/exercise/subjects/1?ts=123456789
-                // GET  http://127.0.0.1/exercise/chapters/1?ts=123456789
-                // GET  http://127.0.0.1/exercise/lessons/1?ts=123456789
-                // GET  http://127.0.0.1/exercise/lessons/1/%2E%2C%2D.jpg?ts=123456789
+                /* Always fetch updates and cache result. Use cached result only when offline. Can block. */
+                // GET  http://127.0.0.1/exercise/v1
+                // GET  http://127.0.0.1/pack/v1
 
-                // GET  http://127.0.0.1/pack/subjects/1?ts=123456789
-                // GET  http://127.0.0.1/pack/folders/1?ts=123456789
-                // GET  http://127.0.0.1/pack/pieces/1?ts=123456789
-                // GET  http://127.0.0.1/pack/pieces/1/2e9201af2920ed0192c2.jpg?ts=123456789
+                /* Use cached result when available. Fetch update and cache on cache miss. Can block. */
+                // GET  http://127.0.0.1/exercise/v1/subjects/1?ts=123456789
+                // GET  http://127.0.0.1/exercise/v1/chapters/1?ts=123456789
+                // GET  http://127.0.0.1/exercise/v1/lessons/1?ts=123456789
+                // GET  http://127.0.0.1/exercise/v1/lessons/1/%2E%2C%2D.jpg?ts=123456789
+                // GET  http://127.0.0.1/pack/v1/subjects/1?ts=123456789
+                // GET  http://127.0.0.1/pack/v1/folders/1?ts=123456789
+                // GET  http://127.0.0.1/pack/v1/pieces/1?ts=123456789
+                // GET  http://127.0.0.1/pack/v1/pieces/1/2e9201af2920ed0192c2.mp4?ts=123456789
+                // GET  http://127.0.0.1/pack/v1/images/1/2e9201af2920ed0192c2.jpg?ts=123456789
                 return mGetRequestHandler.handleRequest(request);
-            case Post:
-                // POST http://127.0.0.1/exercise/user_records/subjects/1
+            case UserData:
+                /* Use cached data when available. Fetch server data on cache miss. Can block. */
+                // GET  http://127.0.0.1/exercise/v1/user_data/subjects/1
+                // GET  http://127.0.0.1/exercise/v1/user_data/achievements/1
+                // GET  http://127.0.0.1/pack/v1/user_data/subjects/1
+                // GET  http://127.0.0.1/pack/v1/user_data/achievements/1
+
+                /* Update cached result and push update to server. Cannot block; queue up post requests. */
+                // POST http://127.0.0.1/exercise/v1/user_data/subjects/1
+                // POST http://127.0.0.1/exercise/v1/user_data/achievements/1
+                // POST http://127.0.0.1/pack/v1/user_data/subjects/1
+                // POST http://127.0.0.1/pack/v1/user_data/achievements/1
                 return mPostRequestHandler.handleRequest(request);
-            case Proxy:
-                // GET  http://127.0.0.1/exercise/subjects
-                // GET  http://127.0.0.1/pack/subjects
-                return mProxyRequestHandler.handleRequest(request);
-            case Manifest:
-                // GET  http://127.0.0.1/exercise/chapters/1?action=cache
-                // GET  http://127.0.0.1/exercise/chapters/1?action=status
+            case BatchCache:
+                /* Prefetch all required resources base on the manifest. Cannot block; returns cache status. */
+                // GET  http://127.0.0.1/exercise/v1/chapters/1?action=cache
+                // GET  http://127.0.0.1/exercise/v1/chapters/1?action=status
+                // GET  http://127.0.0.1/exercise/v1/folders/1?action=cache
+                // GET  http://127.0.0.1/exercise/v1/folders/1?action=status
                 return mManifestRequestHandler.handleRequest(request);
             default:
                 return null;
@@ -60,27 +72,27 @@ public class CompositeRequestHandler implements RequestHandler {
         switch (determineRequestType(request)) {
             case Get:
                 return mGetRequestHandler.fetchResponse(request);
-            case Manifest:
+            case BatchCache:
                 return mManifestRequestHandler.fetchResponse(request);
         }
         return null;
     }
 
     @Override
-    public void stop() {
-
-    }
+    public void stop() {}
 
     private RequestType determineRequestType(ApiRequest request) {
-        if (NanoHTTPD.Method.GET == request.method) {
-            return RequestType.Get;
-        } else {
-            return RequestType.Post;
+        if (NanoHTTPD.Method.POST == request.method) {
+            return RequestType.UserData;
         }
+        if (NanoHTTPD.Method.GET != request.method) {
+            return null;
+        }
+        return null;
     }
 
     private static enum RequestType {
-        Get, Post, Proxy, Manifest
+        Get, UserData, BatchCache
     }
 
 }

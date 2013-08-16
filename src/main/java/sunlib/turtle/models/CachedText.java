@@ -18,16 +18,16 @@ public class CachedText implements Cacheable {
 
     @Override
     public String getCacheId() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null;
     }
 
     @Override
     public Long getTimeStamp() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null;
     }
 
     @Override
     public Object getContent() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null;
     }
 }

@@ -32,4 +32,8 @@ public class ApiRequest {
         params.putAll(params);
         return this;
     }
+
+    public static enum Type {
+        GET, GET_CACHE, POST_CACHE, BATCH_CACHE
+    }
 }
