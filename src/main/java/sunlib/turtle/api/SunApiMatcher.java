@@ -14,7 +14,7 @@ public class SunApiMatcher extends ApiRequestTypeMatcher {
     static SunApiMatcher matcher = new SunApiMatcher();
 
     private SunApiMatcher() {
-        add(GET, NanoHTTPD.Method.GET, "/exercise/v1");
+        add(GET, NanoHTTPD.Method.GET, "/exercise/v1/root\\?callback=[^&]+");
         add(GET, NanoHTTPD.Method.GET, "/pack/v1");
 
         /* Use cached content when available. Fetch update and cache on cache miss. Can block. */
@@ -22,10 +22,10 @@ public class SunApiMatcher extends ApiRequestTypeMatcher {
         // GET  http://127.0.0.1/exercise/v1/subjects/1?ts=123456789
         // GET  http://127.0.0.1/exercise/v1/chapters/1?ts=123456789
         // GET  http://127.0.0.1/exercise/v1/lessons/1?ts=123456789
-        add(GET_CACHE, NanoHTTPD.Method.GET, "/exercise/v1/(subject|chapter|lesson)/[a-z0-9]+\\?ts=[0-9]+");
+        add(GET_CACHE, NanoHTTPD.Method.GET, "/exercise/v1/(subjects|chapters|lessons)/[a-z0-9]+\\?ts=[0-9]+&callback=[^&]+");
 
         // GET  http://127.0.0.1/exercise/v1/lessons/1/%2E%2C%2D.jpg?ts=123456789
-        add(GET_CACHE, NanoHTTPD.Method.GET, "/exercise/v1/lesson/[a-z0-9]+/.+\\.(png|jpg|jpeg|mp4|mp3)\\?ts=[0-9]+");
+        add(GET_CACHE, NanoHTTPD.Method.GET, "/exercise/v1/lessons/[a-z0-9]+/.+\\.(png|jpg|jpeg|mp4|mp3)\\?ts=[0-9]+");
 
         // GET  http://127.0.0.1/pack/v1/subjects/1?ts=123456789
         // GET  http://127.0.0.1/pack/v1/folders/1?ts=123456789
@@ -59,7 +59,7 @@ public class SunApiMatcher extends ApiRequestTypeMatcher {
         // GET  http://127.0.0.1/exercise/v1/chapters/1?action=status
         // GET  http://127.0.0.1/pack/v1/folders/1?action=cache
         // GET  http://127.0.0.1/pack/v1/folders/1?action=status
-        add(BATCH_CACHE, NanoHTTPD.Method.GET, "/exercise/v1/chapters/[a-z0-9]+\\?action=(cache|status)");
+        add(BATCH_CACHE, NanoHTTPD.Method.GET, "/exercise/v1/(chapters|achievements)/[a-z0-9]+\\?ts=[0-9]+&act=(cache|status)&callback=[^&]+");
 
     }
 

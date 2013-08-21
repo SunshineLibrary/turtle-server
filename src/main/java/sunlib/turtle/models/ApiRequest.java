@@ -26,15 +26,16 @@ public class ApiRequest {
         // Get request type from SunApiProvider
         //this.target = MaterialFactory.get(uri, params);
         if (params != null && params.size() > 0) {
-            params.remove(NanoHTTPD.QUERY_STRING_PARAMETER);
-            StringBuilder paramsPart = new StringBuilder();
-            paramsPart.append("?");
-            for (String key : params.keySet()) {
-                paramsPart.append(key)
-                        .append("=")
-                        .append(params.get(key));
-            }
-            uri = uri + paramsPart.toString();
+            uri = uri + "?" + params.get(NanoHTTPD.QUERY_STRING_PARAMETER);
+//            params.remove(NanoHTTPD.QUERY_STRING_PARAMETER);
+//            StringBuilder paramsPart = new StringBuilder();
+//            paramsPart.append("?");
+//            for (String key : params.keySet()) {
+//                paramsPart.append(key)
+//                        .append("=")
+//                        .append(params.get(key));
+//            }
+//            uri = uri + paramsPart.toString();
         }
         this.type = SunApiMatcher.getMatcher().match(method, uri);
     }
@@ -51,6 +52,11 @@ public class ApiRequest {
     public ApiRequest params(Map<String, String> params) {
         params.putAll(params);
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s,%s,%s", method, uri, params);
     }
 
     public static enum Type {

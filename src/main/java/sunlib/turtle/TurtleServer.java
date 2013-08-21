@@ -25,7 +25,7 @@ public class TurtleServer extends NanoHTTPD {
     private RequestQueue mRequestQueue;
 
     public TurtleServer() {
-        super(8080);
+        super(3000);
         try {
             mInjector = Guice.createInjector(new JavaModule());
             mRequestHandler = mInjector.getInstance(RequestHandler.class);
@@ -54,6 +54,7 @@ public class TurtleServer extends NanoHTTPD {
         Response ret = null;
         try {
             ApiRequest req = new ApiRequest(uri, method, header, parms, files);
+            logger.trace("request,{}", req);
             if (req.type == null) {
                 ret = new Response(Response.Status.BAD_REQUEST,
                         MIME_PLAINTEXT,
@@ -66,10 +67,14 @@ public class TurtleServer extends NanoHTTPD {
                             MIME_PLAINTEXT,
                             "internal error");
                 } else if (resp.getData() instanceof CachedText) {
+                    String content = (String) resp.getData().getContent();
+                    if (parms.get("callback") != null) {
+                        content = parms.get("callback") + "(" + content + ")";
+                    }
                     ret = new Response(
                             Response.Status.OK,
                             MIME_PLAINTEXT,
-                            (String) resp.getData().getContent());
+                            content);
                 } else if (resp.getData() instanceof CachedFile) {
                     ret = new Response(
                             Response.Status.OK,

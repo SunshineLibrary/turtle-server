@@ -14,20 +14,15 @@ import java.util.Map;
 @Singleton
 public class MemoryDataCache extends DataCache {
 
-    private static Map<String, String> mData;
-
-    public MemoryDataCache() {
-        mData = new HashMap<String, String>();
-    }
+    private static Map<String, CachedText> mData = new HashMap<String, CachedText>();
 
     @Override
     public CachedText get(String key) {
-//        return mData.get(key);
-        return null;
+        return mData.get(key);
     }
 
     @Override
     protected void put(CachedText text) {
-//        mData.put(key, data) ;
+        mData.put(text.getCacheId(), text);
     }
 }

@@ -8,7 +8,6 @@ package sunlib.turtle.models;
 public class CachedText implements Cacheable {
 
     public String key;
-
     public String content;
 
     public CachedText(String key, String content) {
@@ -18,7 +17,7 @@ public class CachedText implements Cacheable {
 
     @Override
     public String getCacheId() {
-        return null;
+        return key;
     }
 
     @Override
@@ -28,6 +27,6 @@ public class CachedText implements Cacheable {
 
     @Override
     public Object getContent() {
-        return null;
+        return content;
     }
 }
