@@ -1,6 +1,11 @@
 package sunlib.turtle.models;
 
+
+import org.apache.commons.io.FileUtils;
+
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * User: fxp
@@ -9,12 +14,19 @@ import java.io.File;
  */
 public class CachedFile implements Cacheable {
 
-    private File realFile;
-    private String key;
+    public String key;
+    public InputStream in;
 
-    public CachedFile(String key, File file) {
+    public CachedFile(String key, File file) throws IOException {
         this.key = key;
-        this.realFile = file;
+        this.in = FileUtils.openInputStream(file);
+    }
+
+    public CachedFile(String key, InputStream in) throws IOException {
+        this.key = key;
+        File tmp = File.createTempFile("turtle_temp_", ".file");
+        FileUtils.copyInputStreamToFile(in, tmp);
+        this.in = FileUtils.openInputStream(tmp);
     }
 
     @Override
@@ -24,11 +36,11 @@ public class CachedFile implements Cacheable {
 
     @Override
     public Long getTimeStamp() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null;
     }
 
     @Override
     public Object getContent() {
-        return realFile;  //To change body of implemented methods use File | Settings | File Templates.
+        return in;  //To change body of implemented methods use File | Settings | File Templates.
     }
 }

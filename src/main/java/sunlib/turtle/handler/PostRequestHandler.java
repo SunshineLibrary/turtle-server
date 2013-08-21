@@ -6,8 +6,6 @@ import sunlib.turtle.models.ApiRequest;
 import sunlib.turtle.models.ApiResponse;
 import sunlib.turtle.queue.RequestQueue;
 
-import java.util.Date;
-
 /**
  * User: fxp
  * Date: 13-8-6

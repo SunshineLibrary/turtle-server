@@ -1,14 +1,15 @@
 package sunlib.turtle.handler;
 
 import com.google.inject.Inject;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import sunlib.turtle.cache.Cache;
 import sunlib.turtle.models.ApiRequest;
 import sunlib.turtle.models.ApiResponse;
-import sunlib.turtle.models.CachedText;
+import sunlib.turtle.models.Cacheable;
 import sunlib.turtle.queue.RequestQueue;
 
 import javax.inject.Singleton;
-import java.io.OutputStream;
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,6 +20,7 @@ import java.io.OutputStream;
 @Singleton
 public class GetRequestHandler implements RequestHandler {
 
+    static Logger logger = LogManager.getLogger("GetRequestHandler");
     @Inject
     Cache mCache;
     @Inject
@@ -28,21 +30,21 @@ public class GetRequestHandler implements RequestHandler {
 
     @Override
     public ApiResponse handleRequest(ApiRequest request) {
-        String cacheId = request.target.getCacheId();
-        Object result = mCache.get(cacheId);
-        if (result == null) {
-            ApiResponse response = mProxyRequestHandler.handleRequest(request);
-//            mCache.put(request.target.getCacheId(), response.getData(), 0);
-            if (response != null) {
-                if (response.getData() instanceof String) {
-                    mCache.put(
-                            new CachedText(request.target.getCacheId(), (String) response.getData()));
-                } else if (response.getData() instanceof OutputStream) {
-                    //TODO
-//                    CachedFile file = new CachedFile();
-                }
+        ApiResponse ret = null;
+        String cacheId = request.getCacheId();
+        Cacheable cached = mCache.get(cacheId);
+        if (cached == null) {
+            logger.info("cache miss");
+            try {
+                ret = mProxyRequestHandler.handleRequest(request);
+                mCache.put(ret.getData());
+                ret = new ApiResponse(ret, mCache.get(cacheId));
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            return response;
+        } else {
+            logger.info("cache hit");
+            ret = new ApiResponse(true, cached);
         }
 
         if (requireUpdate(request)) {
@@ -50,14 +52,12 @@ public class GetRequestHandler implements RequestHandler {
 
         }
         //TODO: 创建ApiResponse
-        return new ApiResponse(true, result);
+        return ret;
     }
 
     @Override
     public Object fetchResponse(ApiRequest request) {
-        Object response = null;
-//        mCache.put(request.target.getCacheId(), response, 0);
-        return response;
+        return null;
     }
 
     private boolean requireUpdate(ApiRequest request) {

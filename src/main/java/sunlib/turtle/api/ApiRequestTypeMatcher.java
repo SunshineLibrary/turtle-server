@@ -13,22 +13,16 @@ import static fi.iki.elonen.NanoHTTPD.Method;
  * Date: 13-8-14
  */
 public class ApiRequestTypeMatcher {
+    private Map<Pattern, ApiRequest.Type> mGetPatternMap = new HashMap<Pattern, ApiRequest.Type>();
+    private Map<Pattern, ApiRequest.Type> mPostPatternMap = new HashMap<Pattern, ApiRequest.Type>();
 
-    private Map<Pattern, ApiRequest.Type> mGetPatternMap;
-    private Map<Pattern, ApiRequest.Type> mPostPatternMap;
-
-    public ApiRequestTypeMatcher() {
-        mGetPatternMap = new HashMap<Pattern, ApiRequest.Type>();
-        mPostPatternMap = new HashMap<Pattern, ApiRequest.Type>();
-    }
-
-    public void add(ApiRequest.Type type, Method method, String pattern) {
+    protected void add(ApiRequest.Type type, Method method, String pattern) {
         Map<Pattern, ApiRequest.Type> patternMap = getPatternMap(method);
         if (patternMap == null)
             return;
 
         Pattern p = Pattern.compile(pattern);
-        if (! patternMap.containsKey(pattern)) {
+        if (!patternMap.containsKey(pattern)) {
             patternMap.put(p, type);
         }
     }
@@ -38,7 +32,7 @@ public class ApiRequestTypeMatcher {
         if (patternMap == null)
             return null;
 
-        for (Map.Entry<Pattern, ApiRequest.Type> entry: patternMap.entrySet()) {
+        for (Map.Entry<Pattern, ApiRequest.Type> entry : patternMap.entrySet()) {
             if (entry.getKey().matcher(url).matches()) {
                 return entry.getValue();
             }
@@ -48,7 +42,7 @@ public class ApiRequestTypeMatcher {
     }
 
     protected Map<Pattern, ApiRequest.Type> getPatternMap(Method method) {
-        switch(method) {
+        switch (method) {
             case GET:
                 return mGetPatternMap;
             case POST:

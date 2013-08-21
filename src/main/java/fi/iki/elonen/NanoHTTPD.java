@@ -75,7 +75,7 @@ public abstract class NanoHTTPD {
     /**
      * Pseudo-Parameter to use to store the actual query string in the parameters map for later re-processing.
      */
-    private static final String QUERY_STRING_PARAMETER = "NanoHttpd.QUERY_STRING";
+    public static final String QUERY_STRING_PARAMETER = "NanoHttpd.QUERY_STRING";
 
     /**
      * Constructs an HTTP server on given port.
@@ -346,7 +346,7 @@ public abstract class NanoHTTPD {
      * Temp file manager.
      *
      * <p>Temp file managers are created 1-to-1 with incoming requests, to create and cleanup
-     * temporary files created as a result of handling the request.</p>
+     * temporary files created as a content of handling the request.</p>
      */
     public interface TempFileManager {
         TempFile createTempFile() throws Exception;

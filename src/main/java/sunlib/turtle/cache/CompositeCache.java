@@ -8,6 +8,7 @@ import sunlib.turtle.models.CachedText;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.io.InputStream;
 
 /**
  * Created with IntelliJ IDEA.
@@ -34,6 +35,14 @@ public class CompositeCache implements Cache {
             return file;
         }
         return null;
+    }
+
+    public void put(String key, String content) {
+
+    }
+
+    public void put(String key, InputStream in) {
+
     }
 
     @Override

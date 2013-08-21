@@ -4,18 +4,22 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.ServerRunner;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import sunlib.turtle.handler.RequestHandler;
 import sunlib.turtle.models.ApiRequest;
 import sunlib.turtle.models.ApiResponse;
+import sunlib.turtle.models.CachedFile;
+import sunlib.turtle.models.CachedText;
 import sunlib.turtle.module.JavaModule;
 import sunlib.turtle.queue.RequestQueue;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.Map;
 
 public class TurtleServer extends NanoHTTPD {
 
+    static Logger logger = LogManager.getLogger(TurtleServer.class.getName());
     private Injector mInjector;
     private RequestHandler mRequestHandler;
     private RequestQueue mRequestQueue;
@@ -50,28 +54,34 @@ public class TurtleServer extends NanoHTTPD {
         Response ret = null;
         try {
             ApiRequest req = new ApiRequest(uri, method, header, parms, files);
-            resp = mRequestHandler.handleRequest(req);
-            if (resp.getData() == null) {
-                ret = new Response(
-                        Response.Status.INTERNAL_ERROR,
-                        MIME_PLAINTEXT,
-                        "internal error");
-            } else if (resp.getData() instanceof String) {
-                ret = new Response(
-                        Response.Status.OK,
-                        MIME_PLAINTEXT,
-                        (String) resp.getData());
-            } else if (resp.getData() instanceof File) {
-                ret = new Response(
-                        Response.Status.OK,
-                        NanoHTTPD.MIME_DEFAULT_BINARY,
-                        new FileInputStream((File) resp.getData())
-                );
-            } else {
-                ret = new Response(
-                        Response.Status.BAD_REQUEST,
+            if (req.type == null) {
+                ret = new Response(Response.Status.BAD_REQUEST,
                         MIME_PLAINTEXT,
                         "bad request");
+            } else {
+                resp = mRequestHandler.handleRequest(req);
+                if (resp.getData() == null) {
+                    ret = new Response(
+                            Response.Status.INTERNAL_ERROR,
+                            MIME_PLAINTEXT,
+                            "internal error");
+                } else if (resp.getData() instanceof CachedText) {
+                    ret = new Response(
+                            Response.Status.OK,
+                            MIME_PLAINTEXT,
+                            (String) resp.getData().getContent());
+                } else if (resp.getData() instanceof CachedFile) {
+                    ret = new Response(
+                            Response.Status.OK,
+                            NanoHTTPD.MIME_DEFAULT_BINARY,
+                            (InputStream) resp.getData().getContent()
+                    );
+                } else {
+                    ret = new Response(
+                            Response.Status.BAD_REQUEST,
+                            MIME_PLAINTEXT,
+                            "bad request");
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();

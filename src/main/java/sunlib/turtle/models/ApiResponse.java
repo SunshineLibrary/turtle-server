@@ -1,24 +1,33 @@
 package sunlib.turtle.models;
 
-import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * User: fxp
  * Date: 13-8-1
  * Time: PM3:12
  */
-public class ApiResponse implements Serializable {
+public class ApiResponse {
 
     public boolean success;
-    public Object result;
+    public Map<String, String> header = new HashMap<String, String>();
+    public Cacheable content;
 
-    public ApiResponse(boolean success, Object result) {
+    public ApiResponse(boolean success, Cacheable result) {
         this.success = success;
-        this.result = result;
+        this.content = result;
     }
 
-    public Object getData() {
-        return result;
+    public ApiResponse(ApiResponse resp, Cacheable content) {
+        this.success = resp.success;
+        this.header = resp.header;
+        this.content = resp.content;
+        this.content = content;
+    }
+
+    public Cacheable getData() {
+        return content;
     }
 
 }

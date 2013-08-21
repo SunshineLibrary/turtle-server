@@ -1,6 +1,7 @@
 package sunlib.turtle.models;
 
-import sunlib.turtle.module.MaterialFactory;
+import fi.iki.elonen.NanoHTTPD;
+import sunlib.turtle.api.SunApiMatcher;
 
 import java.util.Map;
 
@@ -14,13 +15,32 @@ import static fi.iki.elonen.NanoHTTPD.Method;
 public class ApiRequest {
 
     public Method method;
-    public Material target;
+    public String uri;
     public Map<String, String> params;
+    public Type type;
 
     public ApiRequest(String uri, Method method, Map<String, String> header, Map<String, String> params, Map<String, String> files) {
         this.method = method;
         this.params = params;
-        this.target = MaterialFactory.get(uri, params);
+        this.uri = uri;
+        // Get request type from SunApiProvider
+        //this.target = MaterialFactory.get(uri, params);
+        if (params != null && params.size() > 0) {
+            params.remove(NanoHTTPD.QUERY_STRING_PARAMETER);
+            StringBuilder paramsPart = new StringBuilder();
+            paramsPart.append("?");
+            for (String key : params.keySet()) {
+                paramsPart.append(key)
+                        .append("=")
+                        .append(params.get(key));
+            }
+            uri = uri + paramsPart.toString();
+        }
+        this.type = SunApiMatcher.getMatcher().match(method, uri);
+    }
+
+    public String getCacheId() {
+        return uri;
     }
 
     public ApiRequest param(String key, String value) {

@@ -1,6 +1,7 @@
 package sunlib.turtle.cache.file;
 
-import com.google.common.io.Files;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.FileUtils;
 import sunlib.turtle.models.CachedFile;
 
 import javax.inject.Singleton;
@@ -16,7 +17,7 @@ import java.io.IOException;
 @Singleton
 public class TempFileCache extends FileCache {
 
-    public static final File tmpFolder = new File("./cached/");
+    public static final File tmpFolder = new File("cached");
 
     public TempFileCache() {
         super();
@@ -28,17 +29,23 @@ public class TempFileCache extends FileCache {
 
     @Override
     public CachedFile get(String key) {
-        File ret = new File(tmpFolder, key);
-        if (!ret.exists()) {
-            ret = null;
+        CachedFile ret = null;
+        File cachedFile = new File(tmpFolder, DigestUtils.md5Hex(key));
+        if (cachedFile.exists()) {
+            try {
+                ret = new CachedFile(key, FileUtils.openInputStream(cachedFile));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
-        return new CachedFile(key, ret);
+        return ret;
     }
 
     @Override
     protected void put(CachedFile file) {
         try {
-            Files.move((File) file.getContent(), new File(tmpFolder, file.getCacheId()));
+            String fileName = DigestUtils.md5Hex(file.getCacheId());
+            FileUtils.copyInputStreamToFile(file.in, new File(tmpFolder, fileName));
         } catch (IOException e) {
             e.printStackTrace();
         }
