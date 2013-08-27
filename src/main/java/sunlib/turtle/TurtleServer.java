@@ -4,15 +4,17 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.ServerRunner;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import sunlib.turtle.handler.RequestHandler;
-import sunlib.turtle.models.ApiRequest;
-import sunlib.turtle.models.ApiResponse;
 import sunlib.turtle.models.CachedFile;
 import sunlib.turtle.models.CachedText;
 import sunlib.turtle.module.JavaModule;
 import sunlib.turtle.queue.RequestQueue;
+import sunlib.turtle.services.HeartbeatClient;
+import sunlib.turtle.utils.ApiRequest;
+import sunlib.turtle.utils.ApiResponse;
 
 import java.io.InputStream;
 import java.util.Map;
@@ -25,7 +27,7 @@ public class TurtleServer extends NanoHTTPD {
     private RequestQueue mRequestQueue;
 
     public TurtleServer() {
-        super(3000);
+        super(30000);
         try {
             mInjector = Guice.createInjector(new JavaModule());
             mRequestHandler = mInjector.getInstance(RequestHandler.class);
@@ -38,6 +40,7 @@ public class TurtleServer extends NanoHTTPD {
 
     public static void main(String[] args) {
         ServerRunner.run(TurtleServer.class);
+        new Thread(new HeartbeatClient()).start();
 
     }
 
@@ -58,7 +61,7 @@ public class TurtleServer extends NanoHTTPD {
             if (req.type == null) {
                 ret = new Response(Response.Status.BAD_REQUEST,
                         MIME_PLAINTEXT,
-                        "bad request");
+                        "request type not determined");
             } else {
                 resp = mRequestHandler.handleRequest(req);
                 if (resp.getData() == null) {
@@ -68,6 +71,7 @@ public class TurtleServer extends NanoHTTPD {
                             "internal error");
                 } else if (resp.getData() instanceof CachedText) {
                     String content = (String) resp.getData().getContent();
+                    content = (StringUtils.isEmpty(content)) ? "" : content;
                     if (parms.get("callback") != null) {
                         content = parms.get("callback") + "(" + content + ")";
                     }
@@ -76,11 +80,20 @@ public class TurtleServer extends NanoHTTPD {
                             MIME_PLAINTEXT,
                             content);
                 } else if (resp.getData() instanceof CachedFile) {
+                    String mime = NanoHTTPD.MIME_DEFAULT_BINARY;
+                    if (req.uri.contains("pdf")) {
+                        mime = "application/pdf";
+                    }
                     ret = new Response(
                             Response.Status.OK,
-                            NanoHTTPD.MIME_DEFAULT_BINARY,
+                            mime,
                             (InputStream) resp.getData().getContent()
                     );
+//                    ret = new Response(
+//                            Response.Status.OK,
+//                            NanoHTTPD.MIME_DEFAULT_BINARY,
+//                            new FileInputStream("/Users/fxp/Downloads/Skype_6.7.59.373.pdf")
+//                    );
                 } else {
                     ret = new Response(
                             Response.Status.BAD_REQUEST,
@@ -92,6 +105,7 @@ public class TurtleServer extends NanoHTTPD {
             e.printStackTrace();
             ret = new Response(Response.Status.INTERNAL_ERROR, MIME_PLAINTEXT, "internal error");
         }
+
         return ret;
     }
 }

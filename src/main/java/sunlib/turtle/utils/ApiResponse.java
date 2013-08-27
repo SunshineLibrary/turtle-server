@@ -1,4 +1,6 @@
-package sunlib.turtle.models;
+package sunlib.turtle.utils;
+
+import sunlib.turtle.models.Cacheable;
 
 import java.util.HashMap;
 import java.util.Map;

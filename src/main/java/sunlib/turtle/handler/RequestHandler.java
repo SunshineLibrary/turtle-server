@@ -1,7 +1,7 @@
 package sunlib.turtle.handler;
 
-import sunlib.turtle.models.ApiRequest;
-import sunlib.turtle.models.ApiResponse;
+import sunlib.turtle.utils.ApiRequest;
+import sunlib.turtle.utils.ApiResponse;
 
 /**
  * Created with IntelliJ IDEA.

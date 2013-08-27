@@ -4,10 +4,10 @@ import com.google.inject.Inject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import sunlib.turtle.cache.Cache;
-import sunlib.turtle.models.ApiRequest;
-import sunlib.turtle.models.ApiResponse;
 import sunlib.turtle.models.Cacheable;
 import sunlib.turtle.queue.RequestQueue;
+import sunlib.turtle.utils.ApiRequest;
+import sunlib.turtle.utils.ApiResponse;
 
 import javax.inject.Singleton;
 
@@ -37,8 +37,12 @@ public class GetRequestHandler implements RequestHandler {
             logger.info("cache miss");
             try {
                 ret = mProxyRequestHandler.handleRequest(request);
-                mCache.put(ret.getData());
-                ret = new ApiResponse(ret, mCache.get(cacheId));
+                if (ret.success) {
+                    mCache.put(ret.getData());
+                    ret = new ApiResponse(ret, mCache.get(cacheId));
+                } else {
+                    logger.error("get response failed.{}", request);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -49,7 +53,6 @@ public class GetRequestHandler implements RequestHandler {
 
         if (requireUpdate(request)) {
             mRequestQueue.enqueueRequest(request);
-
         }
         //TODO: 创建ApiResponse
         return ret;

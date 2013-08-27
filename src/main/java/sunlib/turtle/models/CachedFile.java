@@ -4,6 +4,7 @@ package sunlib.turtle.models;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -19,14 +20,14 @@ public class CachedFile implements Cacheable {
 
     public CachedFile(String key, File file) throws IOException {
         this.key = key;
-        this.in = FileUtils.openInputStream(file);
+        this.in = new FileInputStream(file);
     }
 
     public CachedFile(String key, InputStream in) throws IOException {
         this.key = key;
         File tmp = File.createTempFile("turtle_temp_", ".file");
         FileUtils.copyInputStreamToFile(in, tmp);
-        this.in = FileUtils.openInputStream(tmp);
+        this.in = new FileInputStream(tmp);
     }
 
     @Override

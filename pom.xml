@@ -68,7 +68,16 @@
             <artifactId>commons-codec</artifactId>
             <version>1.8</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.2.5</version>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>1.2.0</version>
+        </dependency>
     </dependencies>
 
     <build>

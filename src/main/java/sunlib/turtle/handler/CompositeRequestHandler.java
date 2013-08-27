@@ -1,8 +1,8 @@
 package sunlib.turtle.handler;
 
 import com.google.inject.Inject;
-import sunlib.turtle.models.ApiRequest;
-import sunlib.turtle.models.ApiResponse;
+import sunlib.turtle.utils.ApiRequest;
+import sunlib.turtle.utils.ApiResponse;
 
 import javax.inject.Singleton;
 
@@ -21,6 +21,10 @@ public class CompositeRequestHandler implements RequestHandler {
     PostRequestHandler mPostRequestHandler;
     @Inject
     ManifestRequestHandler mManifestRequestHandler;
+    @Inject
+    ProxyRequestHandler mProxyRequestHandler;
+    @Inject
+    StateRequestHandler mStateRequestHandler;
 
     @Override
     public ApiResponse handleRequest(ApiRequest request) {
@@ -83,6 +87,8 @@ public class CompositeRequestHandler implements RequestHandler {
                 // GET  http://127.0.0.1/exercise/v1/folders/1?action=cache
                 // GET  http://127.0.0.1/exercise/v1/folders/1?action=status
                 return mManifestRequestHandler.handleRequest(request);
+            case STATE:
+                return mStateRequestHandler.handleRequest(request);
             default:
                 return null;
         }

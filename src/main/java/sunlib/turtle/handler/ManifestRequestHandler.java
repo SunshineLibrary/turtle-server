@@ -1,12 +1,17 @@
 package sunlib.turtle.handler;
 
 import com.google.gson.Gson;
+import com.google.inject.Inject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import sunlib.turtle.models.ApiRequest;
-import sunlib.turtle.models.ApiResponse;
+import sunlib.turtle.cache.Cache;
 import sunlib.turtle.models.CachedManifest;
 import sunlib.turtle.models.CachedText;
+import sunlib.turtle.models.ManifestItem;
+import sunlib.turtle.models.ManifestList;
+import sunlib.turtle.utils.ApiRequest;
+import sunlib.turtle.utils.ApiResponse;
+import sunlib.turtle.utils.WS;
 
 import javax.inject.Singleton;
 import java.util.HashMap;
@@ -23,6 +28,8 @@ public class ManifestRequestHandler implements RequestHandler {
 
     static Logger logger = LogManager.getLogger(ManifestRequestHandler.class.getName());
     static Map<String, CachedManifest> cache = new HashMap<String, CachedManifest>();
+    @Inject
+    Cache mCache;
 
     @Override
     public ApiResponse handleRequest(ApiRequest request) {
@@ -35,6 +42,25 @@ public class ManifestRequestHandler implements RequestHandler {
             CachedManifest cached = cache.get(request.getCacheId());
             if (cached == null) {
                 //TODO add tasks to queue and download one by one
+                // Get manifest
+                String manifest = (String) WS.url(
+                        request.uri)
+                        .param("act", "status")
+                        .param("ts", "1")
+                        .get().getData().getContent();
+
+                ManifestList list = new Gson().fromJson(manifest, ManifestList.class);
+                for (ManifestItem item : list.manifest) {
+                    ApiResponse resp = WS.url(item.url).get();
+                    if (resp.success) {
+                        logger.info("start caching file,{}", item.url);
+                        mCache.put(resp.getData());
+                        mCache.put(new CachedManifest());
+                    } else {
+                        logger.info("caching file failed,{}", item.url);
+                    }
+                    logger.info("cached file,{}", item.url);
+                }
                 cache.put(request.getCacheId(), new CachedManifest());
                 ret = new ManifestResponse(false, 0);
             } else {
@@ -45,7 +71,7 @@ public class ManifestRequestHandler implements RequestHandler {
                 CachedManifest cached = cache.get(request.getCacheId());
                 ret = new ManifestResponse();
                 if (!cached.is_cached) {
-                    cached.progress += 20;
+                    cached.progress += 10;
                     if (cached.progress == 100) {
                         cached.is_cached = true;
                     }
@@ -57,7 +83,9 @@ public class ManifestRequestHandler implements RequestHandler {
             }
         }
         return new ApiResponse(true,
-                new CachedText(request.getCacheId(), new Gson().toJson(ret)));
+                new CachedText(request.getCacheId(), new Gson().toJson(ret))
+//                        request.params.get("callback") + "(" + new Gson().toJson(ret) + ")")
+        );
     }
 
     @Override

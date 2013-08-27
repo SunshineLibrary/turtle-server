@@ -1,7 +1,11 @@
 package sunlib.turtle.api;
 
+import fi.iki.elonen.NanoHTTPD;
 import org.junit.Before;
 import org.junit.Test;
+import sunlib.turtle.utils.ApiRequest;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * User: Bowen
@@ -10,24 +14,61 @@ import org.junit.Test;
 
 public class ApiRequestTypeMatcherTest {
 
-    ApiRequestTypeMatcher matcher;
+    SunExerciseCategorizer categorizer;
 
     @Before
     public void setUp() {
-        matcher = new ApiRequestTypeMatcher();
+        categorizer = (SunExerciseCategorizer) TurtleAPI.newCategorizer("sunlib-exercise");
     }
 
     @Test
-    public void testMatchPattern() throws Exception {
-//        matcher.add(ApiRequest.Type.GET, GET, "/exercise/v1");
-//        matcher.add(ApiRequest.Type.GET, GET, "/exercise/v1/subjects/[a-z0-9]+");
-//        matcher.add(ApiRequest.Type.GET_CACHE, GET, "/exercise/v1/subjects/[a-z0-9]+\\?ts=[0-9]+");
-//        matcher.add(ApiRequest.Type.GET_CACHE, POST, "/exercise/v1/chapters/[a-z0-9]+\\?ts=[0-9]+");
-//
-//        assertEquals(ApiRequest.Type.GET, matcher.match(GET, "/exercise/v1"));
-//        assertEquals(ApiRequest.Type.GET, matcher.match(GET, "/exercise/v1/subjects/12"));
-//        assertEquals(ApiRequest.Type.GET_CACHE, matcher.match(GET, "/exercise/v1/subjects/12?ts=123456"));
-//        assertEquals(ApiRequest.Type.GET_CACHE, matcher.match(POST, "/exercise/v1/chapters/1e293de919c0a203?ts=123456"));
-//        SunApiMatcher.getMatcher().match(GET, "/exercise/v1/root");
+    public void testGetRoot() throws Exception {
+        ApiRequest request = new ApiRequest("/exercise/v1/root");
+        request.param("ts", "1");
+        request.method = NanoHTTPD.Method.GET;
+        ApiRequest.Type type = categorizer.getRequestCategory(request);
+        assertEquals(type, ApiRequest.Type.GET);
+    }
+
+    @Test
+    public void testGetMaterial() throws Exception {
+        ApiRequest request = new ApiRequest("/exercise/v1/lessons/123");
+        request.param("ts", "1");
+        request.method = NanoHTTPD.Method.GET;
+        ApiRequest.Type type = categorizer.getRequestCategory(request);
+        assertEquals(type, ApiRequest.Type.GET_CACHE);
+    }
+
+    @Test
+    public void testGetMaterialFile() throws Exception {
+        ApiRequest request = new ApiRequest("/exercise/v1/lessons/05be6bf8-bc78-11e2-9d5a-00163e011797/test.mp4");
+        request.method = NanoHTTPD.Method.GET;
+        ApiRequest.Type type = categorizer.getRequestCategory(request);
+        assertEquals(type, ApiRequest.Type.GET_CACHE);
+    }
+
+    @Test
+    public void testGetUserInfo() throws Exception {
+        ApiRequest request = new ApiRequest("/exercise/v1/user_info");
+        request.param("ts", "1");
+        request.method = NanoHTTPD.Method.GET;
+        ApiRequest.Type type = categorizer.getRequestCategory(request);
+        assertEquals(type, ApiRequest.Type.GET_CACHE);
+    }
+
+    @Test
+    public void testGetUserData() throws Exception {
+        ApiRequest request = new ApiRequest("/exercise/v1/user_data/user_info");
+        request.method = NanoHTTPD.Method.GET;
+        ApiRequest.Type type = categorizer.getRequestCategory(request);
+        assertEquals(type, ApiRequest.Type.GET_CACHE);
+    }
+
+    @Test
+    public void testPostUserData() throws Exception {
+        ApiRequest request = new ApiRequest("/exercise/v1/user_data/user_info");
+        request.method = NanoHTTPD.Method.POST;
+        ApiRequest.Type type = categorizer.getRequestCategory(request);
+        assertEquals(type, ApiRequest.Type.POST_CACHE);
     }
 }

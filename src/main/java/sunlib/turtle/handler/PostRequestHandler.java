@@ -2,9 +2,10 @@ package sunlib.turtle.handler;
 
 import com.google.inject.Inject;
 import sunlib.turtle.cache.Cache;
-import sunlib.turtle.models.ApiRequest;
-import sunlib.turtle.models.ApiResponse;
+import sunlib.turtle.models.CachedText;
 import sunlib.turtle.queue.RequestQueue;
+import sunlib.turtle.utils.ApiRequest;
+import sunlib.turtle.utils.ApiResponse;
 
 /**
  * User: fxp
@@ -28,12 +29,11 @@ public class PostRequestHandler implements RequestHandler {
 
     @Override
     public Object fetchResponse(ApiRequest request) {
-//        mCache.put(
-//                request.target.getCacheId(),
-//                request.params.get("data"),
-//                (new Date()).getTime()
-//        );
-        return new ApiResponse(true, null);  //To change body of implemented methods use File | Settings | File Templates.
+        System.out.println("set user_data," + request.getCacheId() + ":" + request.params.get("data"));
+        mCache.put(new CachedText(request.getCacheId(), request.params.get("data")));
+        CachedText ret = (CachedText) mCache.get(request.getCacheId());
+        System.out.println(ret.getContent());
+        return new ApiResponse(true, ret);  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override

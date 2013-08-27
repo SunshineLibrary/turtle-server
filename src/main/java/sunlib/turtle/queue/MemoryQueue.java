@@ -2,7 +2,7 @@ package sunlib.turtle.queue;
 
 import com.google.inject.Inject;
 import sunlib.turtle.handler.RequestHandler;
-import sunlib.turtle.models.ApiRequest;
+import sunlib.turtle.utils.ApiRequest;
 
 import javax.inject.Singleton;
 import java.util.Queue;

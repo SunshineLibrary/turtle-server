@@ -1,6 +1,6 @@
 package sunlib.turtle.queue;
 
-import sunlib.turtle.models.ApiRequest;
+import sunlib.turtle.utils.ApiRequest;
 
 /**
  * Created with IntelliJ IDEA.

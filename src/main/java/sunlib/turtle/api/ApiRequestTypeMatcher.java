@@ -1,6 +1,6 @@
 package sunlib.turtle.api;
 
-import sunlib.turtle.models.ApiRequest;
+import sunlib.turtle.utils.ApiRequest;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,7 +12,7 @@ import static fi.iki.elonen.NanoHTTPD.Method;
  * User: Bowen
  * Date: 13-8-14
  */
-public class ApiRequestTypeMatcher {
+public abstract class ApiRequestTypeMatcher {
     private Map<Pattern, ApiRequest.Type> mGetPatternMap = new HashMap<Pattern, ApiRequest.Type>();
     private Map<Pattern, ApiRequest.Type> mPostPatternMap = new HashMap<Pattern, ApiRequest.Type>();
 
@@ -27,7 +27,7 @@ public class ApiRequestTypeMatcher {
         }
     }
 
-    public ApiRequest.Type match(Method method, String url) {
+    protected ApiRequest.Type _match(Method method, String url) {
         Map<Pattern, ApiRequest.Type> patternMap = getPatternMap(method);
         if (patternMap == null)
             return null;
@@ -39,6 +39,10 @@ public class ApiRequestTypeMatcher {
         }
 
         return null;
+    }
+
+    public ApiRequest.Type match(Method method, String url) {
+        return _match(method, url);
     }
 
     protected Map<Pattern, ApiRequest.Type> getPatternMap(Method method) {
