@@ -12,7 +12,7 @@ import static org.junit.Assert.assertEquals;
  * Date: 13-8-15
  */
 
-public class ApiRequestTypeMatcherTest {
+public class ApiCategorizerTest {
 
     SunExerciseCategorizer categorizer;
 
