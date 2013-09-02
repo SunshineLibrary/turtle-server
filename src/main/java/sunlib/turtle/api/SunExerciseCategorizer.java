@@ -21,6 +21,10 @@ public class SunExerciseCategorizer implements ApiCategorizer {
 
     protected SunExerciseCategorizer() {
         addMatcher(
+                ApiRequest.Type.GET,
+                NanoHTTPD.Method.GET,
+                "/org.sunshinelibrary.exercise/bootstrap");
+        addMatcher(
                 ApiRequest.Type.STATE,
                 NanoHTTPD.Method.GET,
                 "/state/.*");
@@ -28,6 +32,10 @@ public class SunExerciseCategorizer implements ApiCategorizer {
                 ApiRequest.Type.GET,
                 NanoHTTPD.Method.GET,
                 "/exercise/v1/root");
+        addMatcher(
+                ApiRequest.Type.GET_CACHE,
+                NanoHTTPD.Method.GET,
+                "/app/exercise/.*");
         addMatcher(
                 ApiRequest.Type.GET_CACHE,
                 NanoHTTPD.Method.GET,

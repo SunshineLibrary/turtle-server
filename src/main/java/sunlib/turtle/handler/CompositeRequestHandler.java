@@ -78,7 +78,7 @@ public class CompositeRequestHandler implements RequestHandler {
 
             case BATCH_CACHE:
                 /**
-                 * Prefetch all required resources base on the manifest.
+                 * Prefetch all required resources base on the urls.
                  * Cannot block;
                  * returns cache status.
                  */
@@ -92,11 +92,6 @@ public class CompositeRequestHandler implements RequestHandler {
             default:
                 return null;
         }
-    }
-
-    @Override
-    public Object fetchResponse(ApiRequest request) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override

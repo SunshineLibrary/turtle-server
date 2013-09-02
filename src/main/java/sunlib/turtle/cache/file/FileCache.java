@@ -4,8 +4,6 @@ import sunlib.turtle.cache.Cache;
 import sunlib.turtle.models.Cacheable;
 import sunlib.turtle.models.CachedFile;
 
-import java.io.File;
-
 /**
  * Created with IntelliJ IDEA.
  * User: Bowen

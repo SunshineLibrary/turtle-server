@@ -4,7 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import sunlib.turtle.utils.ApiRequest;
 import sunlib.turtle.utils.ApiResponse;
-import sunlib.turtle.utils.WS;
+import sunlib.turtle.utils.SunWS;
 
 import javax.inject.Singleton;
 
@@ -21,29 +21,19 @@ public class ProxyRequestHandler implements RequestHandler {
 
     @Override
     public ApiResponse handleRequest(ApiRequest request) {
-        return (ApiResponse) fetchResponse(request);
-    }
-
-    @Override
-    public Object fetchResponse(ApiRequest request) {
         ApiResponse ret = null;
         try {
             logger.info("proxy fetch,{}", request);
-            ApiRequest req = WS.url(request.uri).params(request.params);
+            ApiRequest req = SunWS.url(request.uri).params(request.params);
+            // for not caching jsonp part, like "callback_1({...})"
             req.params.remove("callback");
             ret = req.get();
             logger.info("proxy fetched,{}", request);
         } catch (Exception e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
 
         return ret;
-    }
-
-    public boolean isBinaryStream(String type) {
-        return (type.contains("image") ||
-                type.contains("audio") ||
-                type.contains("video"));
     }
 
     @Override

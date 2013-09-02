@@ -3,12 +3,15 @@ package fi.iki.elonen;
 import java.io.IOException;
 
 public class ServerRunner {
-    public static void run(Class serverClass) {
+    public static NanoHTTPD run(Class serverClass) {
+        NanoHTTPD instance = null;
         try {
-            executeInstance((NanoHTTPD) serverClass.newInstance());
+            instance = (NanoHTTPD) serverClass.newInstance();
+            executeInstance(instance);
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return instance;
     }
 
     public static void executeInstance(NanoHTTPD server) {

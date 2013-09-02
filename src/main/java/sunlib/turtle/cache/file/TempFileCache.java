@@ -6,7 +6,10 @@ import sunlib.turtle.models.CachedFile;
 
 import javax.inject.Singleton;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -18,6 +21,11 @@ import java.io.IOException;
 public class TempFileCache extends FileCache {
 
     public static final File tmpFolder = new File("cached");
+    static FilenameFilter hiddenFilter = new FilenameFilter() {
+        public boolean accept(File dir, String name) {
+            return !name.startsWith(".");
+        }
+    };
 
     public TempFileCache() {
         super();
@@ -42,12 +50,28 @@ public class TempFileCache extends FileCache {
     }
 
     @Override
-    protected void put(CachedFile file) {
-        try {
-            String fileName = DigestUtils.md5Hex(file.getCacheId());
-            FileUtils.copyInputStreamToFile(file.in, new File(tmpFolder, fileName));
-        } catch (IOException e) {
-            e.printStackTrace();
+    public Set<String> keySet() {
+        File[] files = tmpFolder.listFiles(hiddenFilter);
+        Set<String> fileNames = new HashSet<String>();
+        for (File file : files) {
+            fileNames.add(file.getName());
         }
+        return fileNames;
+    }
+
+    @Override
+    public void close() {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    protected void put(CachedFile file) {
+//        try {
+//            String fileName = DigestUtils.md5Hex(file.getCacheId());
+//            FileUtils.copyInputStreamToFile(file.in, new File(tmpFolder, fileName));
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+        throw new RuntimeException("not implemented");
     }
 }

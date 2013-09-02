@@ -3,45 +3,39 @@ package sunlib.turtle;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import fi.iki.elonen.NanoHTTPD;
-import fi.iki.elonen.ServerRunner;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import sunlib.turtle.api.SunExerciseCategorizer;
+import sunlib.turtle.api.TurtleAPI;
 import sunlib.turtle.handler.RequestHandler;
 import sunlib.turtle.models.CachedFile;
 import sunlib.turtle.models.CachedText;
 import sunlib.turtle.module.JavaModule;
 import sunlib.turtle.queue.RequestQueue;
-import sunlib.turtle.services.HeartbeatClient;
 import sunlib.turtle.utils.ApiRequest;
 import sunlib.turtle.utils.ApiResponse;
 
-import java.io.InputStream;
+import java.io.FileInputStream;
 import java.util.Map;
 
 public class TurtleServer extends NanoHTTPD {
 
+    public static SunExerciseCategorizer categorizer = (SunExerciseCategorizer) TurtleAPI.newCategorizer("sunlib-exercise");
     static Logger logger = LogManager.getLogger(TurtleServer.class.getName());
-    private Injector mInjector;
     private RequestHandler mRequestHandler;
     private RequestQueue mRequestQueue;
 
     public TurtleServer() {
-        super(30000);
+        super(3001);
         try {
-            mInjector = Guice.createInjector(new JavaModule());
+            Injector mInjector = Guice.createInjector(new JavaModule());
             mRequestHandler = mInjector.getInstance(RequestHandler.class);
             mRequestQueue = mInjector.getInstance(RequestQueue.class);
         } catch (Exception e) {
             e.printStackTrace();
             this.stop();
         }
-    }
-
-    public static void main(String[] args) {
-        ServerRunner.run(TurtleServer.class);
-        new Thread(new HeartbeatClient()).start();
-
     }
 
     @Override
@@ -52,11 +46,18 @@ public class TurtleServer extends NanoHTTPD {
     }
 
     @Override
-    public Response serve(String uri, Method method, Map<String, String> header, Map<String, String> parms, Map<String, String> files) {
+    public Response serve(String uri, Method method, Map<String, String> headers, Map<String, String> parms, Map<String, String> files) {
         ApiResponse resp = null;
         Response ret = null;
+//        ApiRequest request = new ApiRequest("127.0.0.1", 3000, "/exercise/v1/lessons/10111");
+//        mRequestQueue.enqueueRequest(request);
+
         try {
-            ApiRequest req = new ApiRequest(uri, method, header, parms, files);
+            ApiRequest req = new ApiRequest("127.0.0.1", -1, uri)
+                    .method(method)
+                    .params(parms)
+                    .headers(headers);
+            req.type = categorizer.getType(method, uri, parms);
             logger.trace("request,{}", req);
             if (req.type == null) {
                 ret = new Response(Response.Status.BAD_REQUEST,
@@ -67,8 +68,8 @@ public class TurtleServer extends NanoHTTPD {
                 if (resp.getData() == null) {
                     ret = new Response(
                             Response.Status.INTERNAL_ERROR,
-                            MIME_PLAINTEXT,
-                            "internal error");
+                            MIME_JSON,
+                            "{err:'internal error'}");
                 } else if (resp.getData() instanceof CachedText) {
                     String content = (String) resp.getData().getContent();
                     content = (StringUtils.isEmpty(content)) ? "" : content;
@@ -77,28 +78,19 @@ public class TurtleServer extends NanoHTTPD {
                     }
                     ret = new Response(
                             Response.Status.OK,
-                            MIME_PLAINTEXT,
+                            MIME_JSON,
                             content);
                 } else if (resp.getData() instanceof CachedFile) {
-                    String mime = NanoHTTPD.MIME_DEFAULT_BINARY;
-                    if (req.uri.contains("pdf")) {
-                        mime = "application/pdf";
-                    }
                     ret = new Response(
                             Response.Status.OK,
-                            mime,
-                            (InputStream) resp.getData().getContent()
+                            resp.getContentType(),
+                            new FileInputStream(((CachedFile) resp.getData()).file)
                     );
-//                    ret = new Response(
-//                            Response.Status.OK,
-//                            NanoHTTPD.MIME_DEFAULT_BINARY,
-//                            new FileInputStream("/Users/fxp/Downloads/Skype_6.7.59.373.pdf")
-//                    );
                 } else {
                     ret = new Response(
                             Response.Status.BAD_REQUEST,
-                            MIME_PLAINTEXT,
-                            "bad request");
+                            MIME_JSON,
+                            "{err:'bad request'}");
                 }
             }
         } catch (Exception e) {
@@ -107,5 +99,6 @@ public class TurtleServer extends NanoHTTPD {
         }
 
         return ret;
+//        return null;
     }
 }

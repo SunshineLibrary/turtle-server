@@ -1,6 +1,7 @@
 package sunlib.turtle.utils;
 
 import fi.iki.elonen.NanoHTTPD;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -9,8 +10,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
-import sunlib.turtle.api.SunExerciseCategorizer;
-import sunlib.turtle.api.TurtleAPI;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import sunlib.turtle.models.CachedFile;
 import sunlib.turtle.models.CachedText;
 
@@ -27,30 +28,37 @@ import static fi.iki.elonen.NanoHTTPD.Method;
  */
 public class ApiRequest {
 
-    public static SunExerciseCategorizer categorizer = (SunExerciseCategorizer) TurtleAPI.newCategorizer("sunlib-exercise");
+    static Logger logger = LogManager.getLogger(ApiRequest.class.getName());
     public Method method;
+    public String host;
+    public int port;
     public String uri;
+    public Map<String, String> headers = new HashMap<String, String>();
     public Map<String, String> params = new HashMap<String, String>();
     public Type type;
-    public ApiResponse response;
 
-    public ApiRequest(String uri) {
+    public ApiRequest(String host, int port, String uri) {
+        this.host = host;
+        this.port = port;
         this.uri = uri;
     }
 
-    public ApiRequest(String uri, Method method, Map<String, String> header, Map<String, String> params, Map<String, String> files) {
+    public ApiRequest(String host, int port, String uri, Method method, Map<String, String> header, Map<String, String> params, Map<String, String> files) {
+        this.host = host;
+        this.port = port;
+        this.uri = uri;
         this.method = method;
         this.params = params;
-        this.uri = uri;
         // Get request type from SunApiProvider
 //        if (params != null && params.size() > 0) {
 //            uri = uri + "?" + params.get(NanoHTTPD.QUERY_STRING_PARAMETER);
 //        }
 //        this.type = SunApiMatcher.getMatcher().match(method, uri);
-        this.type = categorizer.getType(method, uri, params);
     }
 
-    public ApiRequest(ApiRequest req) {
+    public ApiRequest(String host, int port, ApiRequest req) {
+        this.host = host;
+        this.port = port;
         this.uri = req.uri;
         for (String key : req.params.keySet()) {
             this.params.put(key, req.params.get(key));
@@ -63,16 +71,22 @@ public class ApiRequest {
     }
 
     public String getCacheId() {
-        return uri;
+        String ts = params.get("ts");
+        return uri + ((StringUtils.isEmpty(ts)) ? "" : ts);
     }
 
     public ApiRequest param(String key, String value) {
-        params.put(key, value);
+        this.params.put(key, value);
         return this;
     }
 
     public ApiRequest params(Map<String, String> params) {
-        params.putAll(params);
+        this.params.putAll(params);
+        return this;
+    }
+
+    public ApiRequest headers(Map<String, String> headers) {
+        this.headers.putAll(headers);
         return this;
     }
 
@@ -81,20 +95,10 @@ public class ApiRequest {
         return String.format("%s,%s,%s", method, uri, params);
     }
 
-    public void get(Class c) {
-//        ApiResponse resp= get();
-//        if(resp.getData() instanceof  CachedText){
-//
-//        } else{
-//            return null;
-//        }
-//        new Gson().fromJson();
-    }
-
     public ApiResponse get() {
         ApiResponse ret = null;
         URIBuilder builder = new URIBuilder();
-        builder.setScheme("http").setHost("192.168.3.19").setPort(3000).setPath(uri);
+        builder.setScheme("http").setHost(host).setPort(port).setPath(uri);
         if (params != null) {
             for (String param : params.keySet()) {
                 if (!"callback".equals(param)) {
@@ -102,32 +106,42 @@ public class ApiRequest {
                 }
             }
         }
-        URI uri = null;
         try {
-            uri = builder.build();
+            URI uri = builder.build();
             HttpClient httpclient = new DefaultHttpClient();
             HttpGet httpget = new HttpGet(uri);
             HttpResponse resp = httpclient.execute(httpget);
+
+            logger.info("API:{},{}", httpget.getURI(), params);
+
             HttpEntity entity = resp.getEntity();
             Header[] contentTypes = resp.getHeaders("content-type");
             if (contentTypes != null) {
                 String type = contentTypes[0].getValue();
                 if (!isJSON(type)) {
                     // A file need cache
-                    ret = new ApiResponse(true,
-                            new CachedFile(getCacheId(), entity.getContent()));
+                    ret = new ApiResponse(
+                            true,
+                            new CachedFile(getCacheId(), entity.getContent()))
+                            .mime(type);
                 } else {
                     // Some text need cache
                     String text = EntityUtils.toString(entity, "UTF8");
-                    ret = new ApiResponse(true, new CachedText(getCacheId(), text));
+                    ret = new ApiResponse(
+                            true,
+                            new CachedText(getCacheId(), text))
+                            .mime(type);
                 }
             } else {
                 // Some text need cache
                 String text = EntityUtils.toString(entity, "UTF8");
-                ret = new ApiResponse(true, new CachedText(getCacheId(), text));
+                ret = new ApiResponse(
+                        true,
+                        new CachedText(getCacheId(), text))
+                        .mime(NanoHTTPD.MIME_JSON);
             }
         } catch (Exception e) {
-//            e.printStackTrace();
+            e.printStackTrace();
             ret = new ApiResponse(false, CachedText.getStatus(500));
         }
         return ret;
@@ -135,6 +149,15 @@ public class ApiRequest {
 
     public boolean isJSON(String type) {
         return (type.contains("json"));
+    }
+
+    public void addCallback(String callback) {
+        params.put("callback", callback);
+    }
+
+    public ApiRequest method(NanoHTTPD.Method method) {
+        this.method = method;
+        return this;
     }
 
     public static enum Type {

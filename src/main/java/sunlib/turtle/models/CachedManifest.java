@@ -1,7 +1,7 @@
 package sunlib.turtle.models;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * User: fxp
@@ -13,7 +13,12 @@ public class CachedManifest implements Cacheable {
     public String key;
     public boolean is_cached = false;
     public int progress = 0;
-    public Map<String, String> manifest = new HashMap<String, String>();
+    public List<ManifestItem> manifest = new ArrayList<ManifestItem>();
+
+    public CachedManifest(String key, List<ManifestItem> manifest) {
+        this.key = key;
+        this.manifest = manifest;
+    }
 
     @Override
     public String getCacheId() {

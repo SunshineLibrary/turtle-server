@@ -5,6 +5,7 @@ import sunlib.turtle.models.CachedText;
 import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * User: Bowen
@@ -19,6 +20,16 @@ public class MemoryDataCache extends DataCache {
     @Override
     public CachedText get(String key) {
         return mData.get(key);
+    }
+
+    @Override
+    public Set<String> keySet() {
+        return mData.keySet();
+    }
+
+    @Override
+    public void close() {
+        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override

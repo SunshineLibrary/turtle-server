@@ -7,5 +7,10 @@ package sunlib.turtle.models;
  */
 public class ManifestItem {
     public String url;
+    public String ts;
 
+    @Override
+    public String toString() {
+        return url + ":" + ts;
+    }
 }

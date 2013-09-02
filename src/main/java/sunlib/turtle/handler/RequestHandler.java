@@ -13,7 +13,5 @@ public interface RequestHandler {
 
     public ApiResponse handleRequest(ApiRequest request);
 
-    public Object fetchResponse(ApiRequest request);
-
     public void stop();
 }

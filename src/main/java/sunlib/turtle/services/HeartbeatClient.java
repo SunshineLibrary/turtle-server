@@ -2,7 +2,7 @@ package sunlib.turtle.services;
 
 import org.apache.commons.lang3.StringUtils;
 import sunlib.turtle.storage.KeyValues;
-import sunlib.turtle.utils.WS;
+import sunlib.turtle.utils.SunWS;
 
 /**
  * User: fxp
@@ -16,7 +16,7 @@ public class HeartbeatClient implements Runnable {
         try {
             while (true) {
                 try {
-                    String resp = (String) WS.url("/ping").get().getData().getContent();
+                    String resp = (String) SunWS.url("/ping").get().getData().getContent();
                     if (!StringUtils.isEmpty(resp)) {
                         KeyValues.GLOBAL.put("/state/online", "{'online':true}");
                     }

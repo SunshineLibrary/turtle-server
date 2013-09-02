@@ -1,6 +1,8 @@
 package sunlib.turtle.queue;
 
 import com.google.inject.Inject;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import sunlib.turtle.handler.RequestHandler;
 import sunlib.turtle.utils.ApiRequest;
 
@@ -17,6 +19,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 @Singleton
 public class MemoryQueue implements RequestQueue {
 
+    static Logger logger = LogManager.getLogger(MemoryQueue.class.getName());
     @Inject
     RequestHandler mRequestHandler;
     private Queue<ApiRequest> mRequests;
@@ -59,7 +62,21 @@ public class MemoryQueue implements RequestQueue {
                     }
                 }
                 ApiRequest request = mRequests.remove();
-                mRequestHandler.fetchResponse(request);
+                logger.info("processing a request,{}", request);
+
+                while (true) {
+                    try {
+                        mRequestHandler.handleRequest(request);
+                        break;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        try {
+                            Thread.sleep(60 * 1000);
+                        } catch (InterruptedException e1) {
+                            e1.printStackTrace();
+                        }
+                    }
+                }
             }
         }
     }

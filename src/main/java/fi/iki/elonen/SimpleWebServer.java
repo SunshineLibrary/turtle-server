@@ -214,7 +214,7 @@ public class SimpleWebServer extends NanoHTTPD {
                     }
                 }
 
-                // Change return code and add Content-Range header when skipping is requested
+                // Change return code and add Content-Range responseHeaders when skipping is requested
                 long fileLen = f.length();
                 if (range != null && startFrom >= 0) {
                     if (startFrom >= fileLen) {

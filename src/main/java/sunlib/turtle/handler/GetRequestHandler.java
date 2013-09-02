@@ -34,12 +34,12 @@ public class GetRequestHandler implements RequestHandler {
         String cacheId = request.getCacheId();
         Cacheable cached = mCache.get(cacheId);
         if (cached == null) {
-            logger.info("cache miss");
+            logger.warn("cache miss");
             try {
                 ret = mProxyRequestHandler.handleRequest(request);
-                if (ret.success) {
+                if (ret != null && ret.success) {
                     mCache.put(ret.getData());
-                    ret = new ApiResponse(ret, mCache.get(cacheId));
+                    ret = new ApiResponse(true, mCache.get(cacheId));
                 } else {
                     logger.error("get response failed.{}", request);
                 }
@@ -51,16 +51,10 @@ public class GetRequestHandler implements RequestHandler {
             ret = new ApiResponse(true, cached);
         }
 
-        if (requireUpdate(request)) {
-            mRequestQueue.enqueueRequest(request);
-        }
-        //TODO: 创建ApiResponse
+//        if (requireUpdate(request)) {
+//            mRequestQueue.enqueueRequest(request);
+//        }
         return ret;
-    }
-
-    @Override
-    public Object fetchResponse(ApiRequest request) {
-        return null;
     }
 
     private boolean requireUpdate(ApiRequest request) {

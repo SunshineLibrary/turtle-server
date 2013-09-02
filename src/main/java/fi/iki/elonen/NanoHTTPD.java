@@ -37,7 +37,7 @@ import java.util.*;
  * <li>File server supports simple skipping for files (continue download)</li>
  * <li>File server serves also very long files without memory overhead</li>
  * <li>Contains a built-in list of most common mime types</li>
- * <li>All header names are converted lowercase so they don't vary between browsers/clients</li>
+ * <li>All responseHeaders names are converted lowercase so they don't vary between browsers/clients</li>
  * <p/>
  * </ul>
  * <p/>
@@ -60,6 +60,8 @@ public abstract class NanoHTTPD {
      * Common mime type for dynamic content: html
      */
     public static final String MIME_HTML = "text/html";
+    public static final String MIME_JSON = "application/json";
+    public static final String MIME_JAVASCRIPT = "application/javascript";
     /**
      * Common mime type for dynamic content: binary
      */
@@ -532,7 +534,7 @@ public abstract class NanoHTTPD {
         }
 
         /**
-         * Adds given line to the header.
+         * Adds given line to the responseHeaders.
          */
         public void addHeader(String name, String value) {
             header.put(name, value);
@@ -708,9 +710,9 @@ public abstract class NanoHTTPD {
         public void execute() throws IOException {
             try {
                 // Read the first 8192 bytes.
-                // The full header should fit in here.
-                // Apache's default header limit is 8KB.
-                // Do NOT assume that a single read will get the entire header at once!
+                // The full responseHeaders should fit in here.
+                // Apache's default responseHeaders limit is 8KB.
+                // Do NOT assume that a single read will get the entire responseHeaders at once!
                 byte[] buf = new byte[BUFSIZE];
                 splitbyte = 0;
                 rlen = 0;
@@ -738,10 +740,10 @@ public abstract class NanoHTTPD {
                 parms = new HashMap<String, String>();
                 headers = new HashMap<String, String>();
 
-                // Create a BufferedReader for parsing the header.
+                // Create a BufferedReader for parsing the responseHeaders.
                 BufferedReader hin = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(buf, 0, rlen)));
 
-                // Decode the header into parms and header java properties
+                // Decode the responseHeaders into parms and responseHeaders java properties
                 Map<String, String> pre = new HashMap<String, String>();
                 decodeHeader(hin, pre, parms, headers);
 
@@ -895,7 +897,7 @@ public abstract class NanoHTTPD {
 
                 // If there's another token, it's protocol version,
                 // followed by HTTP headers. Ignore version but parse headers.
-                // NOTE: this now forces header names lowercase since they are
+                // NOTE: this now forces responseHeaders names lowercase since they are
                 // case insensitive and vary by client.
                 if (st.hasMoreTokens()) {
                     String line = in.readLine();
@@ -988,7 +990,7 @@ public abstract class NanoHTTPD {
         }
 
         /**
-         * Find byte index separating header from body. It must be the last byte of the first two sequential new lines.
+         * Find byte index separating responseHeaders from body. It must be the last byte of the first two sequential new lines.
          */
         private int findHeaderEnd(final byte[] buf, int rlen) {
             int splitbyte = 0;
