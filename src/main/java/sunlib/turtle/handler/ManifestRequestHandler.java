@@ -38,7 +38,6 @@ public class ManifestRequestHandler implements RequestHandler {
     @Override
     public ApiResponse handleRequest(ApiRequest request) {
         logger.trace("urls request,{}", request.toString());
-        // get urls from act=status API
 
         ManifestResponse ret = null;
 

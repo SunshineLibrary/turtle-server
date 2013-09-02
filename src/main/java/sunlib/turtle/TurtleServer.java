@@ -65,7 +65,7 @@ public class TurtleServer extends NanoHTTPD {
                         "request type not determined");
             } else {
                 resp = mRequestHandler.handleRequest(req);
-                if (resp.getData() == null) {
+                if (resp == null || !resp.success || resp.getData() == null) {
                     ret = new Response(
                             Response.Status.INTERNAL_ERROR,
                             MIME_JSON,

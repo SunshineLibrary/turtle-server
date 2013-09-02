@@ -1,6 +1,7 @@
 package sunlib.turtle.handler;
 
 import com.google.inject.Inject;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import sunlib.turtle.cache.Cache;
@@ -51,14 +52,16 @@ public class GetRequestHandler implements RequestHandler {
             ret = new ApiResponse(true, cached);
         }
 
-//        if (requireUpdate(request)) {
-//            mRequestQueue.enqueueRequest(request);
-//        }
+        if (requireUpdate(request)) {
+            mRequestQueue.enqueueRequest(request);
+        }
         return ret;
     }
 
     private boolean requireUpdate(ApiRequest request) {
-        //TODO: judge by timestamp
+        if (StringUtils.isEmpty(request.params.get("ts"))) {
+            // TODO: enqueue a GET request
+        }
         return false;
     }
 
