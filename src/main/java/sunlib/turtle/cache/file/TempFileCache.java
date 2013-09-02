@@ -66,12 +66,12 @@ public class TempFileCache extends FileCache {
 
     @Override
     protected void put(CachedFile file) {
-//        try {
-//            String fileName = DigestUtils.md5Hex(file.getCacheId());
-//            FileUtils.copyInputStreamToFile(file.in, new File(tmpFolder, fileName));
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-        throw new RuntimeException("not implemented");
+        try {
+            String fileName = DigestUtils.md5Hex(file.getCacheId());
+            FileUtils.copyFile(file.file, new File(tmpFolder, fileName));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+//        throw new RuntimeException("not implemented");
     }
 }

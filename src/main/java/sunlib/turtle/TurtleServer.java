@@ -49,9 +49,6 @@ public class TurtleServer extends NanoHTTPD {
     public Response serve(String uri, Method method, Map<String, String> headers, Map<String, String> parms, Map<String, String> files) {
         ApiResponse resp = null;
         Response ret = null;
-//        ApiRequest request = new ApiRequest("127.0.0.1", 3000, "/exercise/v1/lessons/10111");
-//        mRequestQueue.enqueueRequest(request);
-
         try {
             ApiRequest req = new ApiRequest("127.0.0.1", -1, uri)
                     .method(method)
@@ -62,7 +59,7 @@ public class TurtleServer extends NanoHTTPD {
             if (req.type == null) {
                 ret = new Response(Response.Status.BAD_REQUEST,
                         MIME_PLAINTEXT,
-                        "request type not determined");
+                        "{err:'request type not recognized'}");
             } else {
                 resp = mRequestHandler.handleRequest(req);
                 if (resp == null || !resp.success || resp.getData() == null) {

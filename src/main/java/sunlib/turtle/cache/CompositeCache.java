@@ -1,19 +1,18 @@
 package sunlib.turtle.cache;
 
+import com.google.inject.Inject;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
-import sunlib.turtle.cache.file.TempFileManager;
+import sunlib.turtle.cache.file.FileCache;
 import sunlib.turtle.models.Cacheable;
 import sunlib.turtle.models.CachedFile;
 import sunlib.turtle.models.CachedItem;
 import sunlib.turtle.models.CachedText;
 
 import javax.inject.Singleton;
-import java.io.File;
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.List;
@@ -30,8 +29,8 @@ public class CompositeCache implements Cache {
 
     //    @Inject
 //    DataCache mDataCache;
-//    @Inject
-//    FileCache mFileCache;
+    @Inject
+    FileCache mFileCache;
     ConnectionSource connectionSource;
     Dao<CachedItem, String> cacheDAO;
 
@@ -55,11 +54,8 @@ public class CompositeCache implements Cache {
             if ("text".equals(item.content_type)) {
                 ret = new CachedText(key, item.content);
             } else if ("file".equals(item.content_type)) {
-                try {
-                    ret = new CachedFile(key, TempFileManager.getInstance().get(key));
-                } catch (IOException e) {
-                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-                }
+//                    ret = new CachedFile(key, TempFileManager.getInstance().get(key));
+                ret = mFileCache.get(key);
             }
         }
         return ret;
@@ -86,13 +82,11 @@ public class CompositeCache implements Cache {
                 if (item != null) {
                     System.err.println("SHOULD NOT BE HERE");
                 } else {
-                    File newFile = TempFileManager.getInstance().put(
-                            cacheable.getCacheId(),
-                            ((CachedFile) cacheable).file);
-                    ((CachedFile) cacheable).file = newFile;
-                    item = new CachedItem((CachedFile) cacheable);
+                    mFileCache.put(cacheable);
+                    CachedFile cached = mFileCache.get(cacheable.getCacheId());
+                    item = new CachedItem((CachedFile) cached);
                     cacheDAO.create(item);
-                    System.out.println("created a tmp file," + newFile.getAbsolutePath());
+                    System.out.println("created a tmp file," + item.content);
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
