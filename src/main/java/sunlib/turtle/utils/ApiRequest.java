@@ -1,5 +1,6 @@
 package sunlib.turtle.utils;
 
+import com.google.gson.annotations.SerializedName;
 import fi.iki.elonen.NanoHTTPD;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
@@ -15,6 +16,7 @@ import org.apache.logging.log4j.Logger;
 import sunlib.turtle.models.CachedFile;
 import sunlib.turtle.models.CachedText;
 
+import java.io.Serializable;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,7 +28,7 @@ import static fi.iki.elonen.NanoHTTPD.Method;
  * Date: 13-8-1
  * Time: PM3:12
  */
-public class ApiRequest {
+public class ApiRequest implements Serializable {
 
     static Logger logger = LogManager.getLogger(ApiRequest.class.getName());
     public Method method;

@@ -1,14 +1,20 @@
 package sunlib.turtle.queue;
 
 import com.google.inject.Inject;
+import com.squareup.tape.FileObjectQueue;
+import com.squareup.tape.ObjectQueue;
+import com.squareup.tape.SerializedConverter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import sunlib.turtle.api.ApiCategorizer;
+import sunlib.turtle.api.SunExerciseCategorizer;
+import sunlib.turtle.api.TurtleAPI;
+import sunlib.turtle.cache.file.FileCache;
 import sunlib.turtle.handler.RequestHandler;
 import sunlib.turtle.utils.ApiRequest;
 
 import javax.inject.Singleton;
-import java.util.Queue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.io.File;
 
 /**
  * Created with IntelliJ IDEA.
@@ -22,11 +28,20 @@ public class MemoryQueue implements RequestQueue {
     static Logger logger = LogManager.getLogger(MemoryQueue.class.getName());
     @Inject
     RequestHandler mRequestHandler;
-    private Queue<ApiRequest> mRequests;
+    @Inject
+    FileCache mFileCache;
+
+
+    private ObjectQueue<ApiRequest> mRequests;
     private Thread mThread;
 
     public MemoryQueue() {
-        mRequests = new LinkedBlockingQueue<ApiRequest>();
+        File file = new File("CAO");
+        try {
+            mRequests = new FileObjectQueue<ApiRequest>(file, new SerializedConverter<ApiRequest>());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         mThread = new Thread(new Looper());
         mThread.setDaemon(true);
         mThread.start();
@@ -34,8 +49,10 @@ public class MemoryQueue implements RequestQueue {
 
     @Override
     public void enqueueRequest(ApiRequest request) {
-        mRequests.add(request);
-        mRequests.notify();
+        synchronized (mRequests){
+            mRequests.add(request);
+            mRequests.notify();
+        }
     }
 
     @Override
@@ -53,7 +70,7 @@ public class MemoryQueue implements RequestQueue {
         public void run() {
             while (true) {
                 synchronized (mRequests) {
-                    if (mRequests.isEmpty()) {
+                    if (mRequests.size() == 0) {
                         try {
                             mRequests.wait();
                         } catch (InterruptedException e) {
@@ -61,12 +78,12 @@ public class MemoryQueue implements RequestQueue {
                         }
                     }
                 }
-                ApiRequest request = mRequests.remove();
+                ApiRequest request = mRequests.peek();
                 logger.info("processing a request,{}", request);
-
                 while (true) {
                     try {
                         mRequestHandler.handleRequest(request);
+                        mRequests.remove();
                         break;
                     } catch (Exception e) {
                         e.printStackTrace();
