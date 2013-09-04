@@ -1,6 +1,5 @@
 package sunlib.turtle.utils;
 
-import com.google.gson.annotations.SerializedName;
 import fi.iki.elonen.NanoHTTPD;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
@@ -8,6 +7,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
@@ -38,6 +38,7 @@ public class ApiRequest implements Serializable {
     public Map<String, String> headers = new HashMap<String, String>();
     public Map<String, String> params = new HashMap<String, String>();
     public Type type;
+    public String manifestId;
 
     public ApiRequest(String host, int port, String uri) {
         this.host = host;
@@ -74,7 +75,15 @@ public class ApiRequest implements Serializable {
 
     public String getCacheId() {
         String ts = params.get("ts");
-        return uri + ((StringUtils.isEmpty(ts)) ? "" : ts);
+        StringBuilder sb = new StringBuilder();
+        sb.append(uri);
+        if (!StringUtils.isEmpty(ts)) {
+            sb.append(ts);
+        }
+        if (Type.BATCH_CACHE.equals(type)) {
+            sb.append(".MANIFEST");
+        }
+        return sb.toString();
     }
 
     public ApiRequest param(String key, String value) {
@@ -160,6 +169,53 @@ public class ApiRequest implements Serializable {
     public ApiRequest method(NanoHTTPD.Method method) {
         this.method = method;
         return this;
+    }
+
+    public ApiResponse post() {
+        ApiResponse ret = null;
+        URIBuilder builder = new URIBuilder();
+        builder.setScheme("http").setHost(host).setPort(port).setPath(uri);
+        if (params != null) {
+            for (String param : params.keySet()) {
+                if (!"callback".equals(param)) {
+                    builder.setParameter(param, params.get(param));
+                }
+            }
+        }
+        try {
+            URI uri = builder.build();
+            HttpClient httpclient = new DefaultHttpClient();
+            HttpPost httpPost = new HttpPost(uri);
+            HttpResponse resp = httpclient.execute(httpPost);
+            logger.info("API:{},{}", httpPost.getURI(), params);
+
+            HttpEntity entity = resp.getEntity();
+            Header[] contentTypes = resp.getHeaders("content-type");
+            if (contentTypes != null) {
+                String type = contentTypes[0].getValue();
+                if (!isJSON(type)) {
+                    logger.error("NOT POSSIBLE");
+                } else {
+                    // Some text need cache
+                    String text = EntityUtils.toString(entity, "UTF8");
+                    ret = new ApiResponse(
+                            true,
+                            new CachedText(getCacheId(), text))
+                            .mime(type);
+                }
+            } else {
+                // Some text need cache
+                String text = EntityUtils.toString(entity, "UTF8");
+                ret = new ApiResponse(
+                        true,
+                        new CachedText(getCacheId(), text))
+                        .mime(NanoHTTPD.MIME_JSON);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            ret = new ApiResponse(false, CachedText.getStatus(500));
+        }
+        return ret;
     }
 
     public static enum Type {

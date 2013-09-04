@@ -6,6 +6,7 @@ import sunlib.turtle.models.CachedText;
 import sunlib.turtle.queue.RequestQueue;
 import sunlib.turtle.utils.ApiRequest;
 import sunlib.turtle.utils.ApiResponse;
+import sunlib.turtle.utils.SunWS;
 
 /**
  * User: fxp
@@ -19,7 +20,7 @@ public class PostRequestHandler implements RequestHandler {
     @Inject
     ProxyRequestHandler mProxyRequestHandler;
     @Inject
-    RequestQueue mRequestQueue;
+    RequestQueue queue;
 
     @Override
     public ApiResponse handleRequest(ApiRequest request) {
@@ -28,10 +29,11 @@ public class PostRequestHandler implements RequestHandler {
     }
 
     public Object fetchResponse(ApiRequest request) {
-        System.out.println("set user_data," + request.getCacheId() + ":" + request.params.get("data"));
         mCache.put(new CachedText(request.getCacheId(), request.params.get("data")));
         CachedText ret = (CachedText) mCache.get(request.getCacheId());
-        System.out.println(ret.getContent());
+        ApiRequest task = SunWS.url(request.uri).param("data", request.params.get("data"));
+        task.type = ApiRequest.Type.POST_CACHE;
+        queue.enqueueRequest(task);
         return new ApiResponse(true, ret);  //To change body of implemented methods use File | Settings | File Templates.
     }
 

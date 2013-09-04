@@ -4,14 +4,14 @@ import com.google.inject.Inject;
 import com.squareup.tape.FileObjectQueue;
 import com.squareup.tape.ObjectQueue;
 import com.squareup.tape.SerializedConverter;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import sunlib.turtle.api.ApiCategorizer;
-import sunlib.turtle.api.SunExerciseCategorizer;
-import sunlib.turtle.api.TurtleAPI;
-import sunlib.turtle.cache.file.FileCache;
+import sunlib.turtle.cache.Cache;
 import sunlib.turtle.handler.RequestHandler;
+import sunlib.turtle.models.CachedManifest;
 import sunlib.turtle.utils.ApiRequest;
+import sunlib.turtle.utils.ApiResponse;
 
 import javax.inject.Singleton;
 import java.io.File;
@@ -23,33 +23,83 @@ import java.io.File;
  */
 
 @Singleton
-public class MemoryQueue implements RequestQueue {
+public class MemoryQueue implements RequestQueue, Runnable {
 
     static Logger logger = LogManager.getLogger(MemoryQueue.class.getName());
     @Inject
     RequestHandler mRequestHandler;
     @Inject
-    FileCache mFileCache;
-
-
+    Cache cache;
     private ObjectQueue<ApiRequest> mRequests;
     private Thread mThread;
 
     public MemoryQueue() {
-        File file = new File("CAO");
+        File file = new File("task.db");
         try {
             mRequests = new FileObjectQueue<ApiRequest>(file, new SerializedConverter<ApiRequest>());
         } catch (Exception e) {
             e.printStackTrace();
         }
-        mThread = new Thread(new Looper());
-        mThread.setDaemon(true);
-        mThread.start();
+        new Thread(this).start();
+    }
+
+    @Override
+    public void run() {
+        while (true) {
+            synchronized (mRequests) {
+                if (mRequests.size() == 0) {
+                    try {
+                        mRequests.wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            ApiRequest request = mRequests.peek();
+            logger.info("processing a request,{}", request);
+            while (true) {
+                try {
+//                        mRequestHandler.handleRequest(request);
+                    logger.info("do something with this request");
+                    if (ApiRequest.Type.GET.equals(request.type)
+                            || ApiRequest.Type.GET_CACHE.equals(request.type)) {
+                        ApiResponse resp = request.get();
+                        cache.put(resp.getData());
+                        if (!StringUtils.isEmpty(request.manifestId)) {
+                            CachedManifest manifest = (CachedManifest) cache.get(request.manifestId);
+                            //TODO: Do something
+                            manifest.left--;
+                            if (manifest.left == 0) {
+                                manifest.is_cached = true;
+                            }
+                            cache.put(manifest);
+                        }
+                    } else if (ApiRequest.Type.POST_CACHE.equals(request.type)) {
+                        ApiResponse resp = request.post();
+                        if (resp.success) {
+                            cache.put(resp.getData());
+                        }
+                    }
+                    mRequests.remove();
+                    logger.info("task completed,{}", request);
+                    Thread.sleep(5000);
+                    break;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    try {
+                        Thread.sleep(60 * 1000);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                }
+            }
+        }
+
     }
 
     @Override
     public void enqueueRequest(ApiRequest request) {
-        synchronized (mRequests){
+        synchronized (mRequests) {
             mRequests.add(request);
             mRequests.notify();
         }
@@ -62,39 +112,6 @@ public class MemoryQueue implements RequestQueue {
             mThread.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }
-    }
-
-    private class Looper implements Runnable {
-        @Override
-        public void run() {
-            while (true) {
-                synchronized (mRequests) {
-                    if (mRequests.size() == 0) {
-                        try {
-                            mRequests.wait();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-                ApiRequest request = mRequests.peek();
-                logger.info("processing a request,{}", request);
-                while (true) {
-                    try {
-                        mRequestHandler.handleRequest(request);
-                        mRequests.remove();
-                        break;
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        try {
-                            Thread.sleep(60 * 1000);
-                        } catch (InterruptedException e1) {
-                            e1.printStackTrace();
-                        }
-                    }
-                }
-            }
         }
     }
 }

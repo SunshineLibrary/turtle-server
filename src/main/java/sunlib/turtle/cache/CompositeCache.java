@@ -1,16 +1,16 @@
 package sunlib.turtle.cache;
 
+import com.google.gson.Gson;
 import com.google.inject.Inject;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import sunlib.turtle.cache.file.FileCache;
-import sunlib.turtle.models.Cacheable;
-import sunlib.turtle.models.CachedFile;
-import sunlib.turtle.models.CachedItem;
-import sunlib.turtle.models.CachedText;
+import sunlib.turtle.models.*;
 
 import javax.inject.Singleton;
 import java.sql.SQLException;
@@ -27,6 +27,7 @@ import java.util.Set;
 @Singleton
 public class CompositeCache implements Cache {
 
+    static Logger logger = LogManager.getLogger(CompositeCache.class.getName());
     //    @Inject
 //    DataCache mDataCache;
     @Inject
@@ -35,14 +36,15 @@ public class CompositeCache implements Cache {
     Dao<CachedItem, String> cacheDAO;
 
     public CompositeCache() throws SQLException {
-        String databaseUrl = "jdbc:h2:mem:cached_item";
+        String databaseUrl = "jdbc:h2:cached_item";
         connectionSource = new JdbcConnectionSource(databaseUrl);
+        TableUtils.createTableIfNotExists(connectionSource, CachedItem.class);
         cacheDAO = DaoManager.createDao(connectionSource, CachedItem.class);
-        TableUtils.createTable(connectionSource, CachedItem.class);
     }
 
     @Override
     public Cacheable get(String key) {
+        logger.info("get an item,{}", key);
         Cacheable ret = null;
         CachedItem item = null;
         try {
@@ -51,11 +53,13 @@ public class CompositeCache implements Cache {
             e.printStackTrace();
         }
         if (item != null) {
+            logger.info("got a item,{},{}", item.content_type, key);
             if ("text".equals(item.content_type)) {
                 ret = new CachedText(key, item.content);
             } else if ("file".equals(item.content_type)) {
-//                    ret = new CachedFile(key, TempFileManager.getInstance().get(key));
                 ret = mFileCache.get(key);
+            } else if ("manifest".equals(item.content_type)) {
+                ret = new Gson().fromJson(item.content, CachedManifest.class);
             }
         }
         return ret;
@@ -63,12 +67,13 @@ public class CompositeCache implements Cache {
 
     @Override
     public void put(Cacheable cacheable) {
+        logger.info("put an item,{}", cacheable.getCacheId());
         if (cacheable instanceof CachedText) {
 //            mDataCache.put(cacheable);
             try {
                 CachedItem item = cacheDAO.queryForId(cacheable.getCacheId());
                 if (item != null) {
-                    System.err.println("SHOULD NOT BE HERE");
+                    cacheDAO.update(item);
                 } else {
                     item = new CachedItem((CachedText) cacheable);
                     cacheDAO.create(item);
@@ -80,13 +85,24 @@ public class CompositeCache implements Cache {
             try {
                 CachedItem item = cacheDAO.queryForId(cacheable.getCacheId());
                 if (item != null) {
-                    System.err.println("SHOULD NOT BE HERE");
+                    cacheDAO.update(item);
                 } else {
                     mFileCache.put(cacheable);
                     CachedFile cached = mFileCache.get(cacheable.getCacheId());
-                    item = new CachedItem((CachedFile) cached);
+                    item = new CachedItem(cached);
                     cacheDAO.create(item);
-                    System.out.println("created a tmp file," + item.content);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        } else if (cacheable instanceof CachedManifest) {
+            try {
+                CachedItem item = cacheDAO.queryForId(cacheable.getCacheId());
+                if (item != null) {
+                    cacheDAO.update(item);
+                } else {
+                    item = new CachedItem((CachedManifest) cacheable);
+                    cacheDAO.create(item);
                 }
             } catch (SQLException e) {
                 e.printStackTrace();

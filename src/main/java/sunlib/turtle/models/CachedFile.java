@@ -18,7 +18,7 @@ public class CachedFile implements Cacheable {
     public File file;
     public String mime;
 
-    public CachedFile(String key, File file) throws IOException {
+    public CachedFile(String key, File file) {
         this.key = key;
         this.file = file;
     }

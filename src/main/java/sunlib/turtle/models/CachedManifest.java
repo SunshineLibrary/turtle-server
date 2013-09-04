@@ -1,6 +1,5 @@
 package sunlib.turtle.models;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -13,11 +12,11 @@ public class CachedManifest implements Cacheable {
     public String key;
     public boolean is_cached = false;
     public int progress = 0;
-    public List<ManifestItem> manifest = new ArrayList<ManifestItem>();
+    public int total;
+    public int left;
+    public List<ManifestItem> manifest;
 
-    public CachedManifest(String key, List<ManifestItem> manifest) {
-        this.key = key;
-        this.manifest = manifest;
+    public CachedManifest() {
     }
 
     @Override

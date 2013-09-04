@@ -13,6 +13,8 @@ import sunlib.turtle.utils.ApiRequest;
 import sunlib.turtle.utils.ApiResponse;
 import sunlib.turtle.utils.WS;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,7 +54,7 @@ public class AppAPITest {
         server = ServerRunner.run(TurtleServer.class);
     }
 
-    public void testGetApi(ApiRequest request, boolean success) {
+    public void testGetApi(ApiRequest request, boolean success) throws IOException, URISyntaxException {
         System.out.println("TEST:" + request);
         ApiResponse resp = null;
         resp = request.get();
@@ -60,22 +62,22 @@ public class AppAPITest {
         assertTrue(!StringUtils.isEmpty((String) resp.getData().getContent()));
     }
 
-    public void testGETUrl(String uri, String ts, boolean success) {
+    public void testGETUrl(String uri, String ts, boolean success) throws IOException, URISyntaxException {
         ApiResponse resp = getRequest(uri).param("ts", ts).get();
         assertEquals(success, resp.success);
     }
 
-    public void testCached(String uri, String ts, boolean success) {
+    public void testCached(String uri, String ts, boolean success) throws IOException, URISyntaxException {
         ApiResponse resp = getRequest("/state/cache").get();
         List<String> cached = new Gson().fromJson((String) resp.getData().getContent(), new ArrayList<String>().getClass());
         assertEquals(success, cached.contains(uri));
     }
 
-    public void testGETApiWithFailedResult(ApiRequest request) {
+    public void testGETApiWithFailedResult(ApiRequest request) throws IOException, URISyntaxException {
         testGetApi(request, false);
     }
 
-    public void testGETApiWithSuccessResult(ApiRequest request) {
+    public void testGETApiWithSuccessResult(ApiRequest request) throws IOException, URISyntaxException {
         testGetApi(request, true);
     }
 

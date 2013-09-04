@@ -32,7 +32,6 @@ public class TempFileCache extends FileCache {
         if (!tmpFolder.exists()) {
             tmpFolder.mkdir();
         }
-        System.out.println("Temp folder:" + tmpFolder.getAbsolutePath());
     }
 
     @Override
