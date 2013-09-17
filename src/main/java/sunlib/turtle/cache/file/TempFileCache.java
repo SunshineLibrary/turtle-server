@@ -20,7 +20,7 @@ import java.util.Set;
 @Singleton
 public class TempFileCache extends FileCache {
 
-    public static final File tmpFolder = new File("cached");
+    public static final File tmpFolder = new File("/sdcard/sunturtle_1/cached");
     static FilenameFilter hiddenFilter = new FilenameFilter() {
         public boolean accept(File dir, String name) {
             return !name.startsWith(".");

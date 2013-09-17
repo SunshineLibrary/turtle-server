@@ -28,15 +28,14 @@ import java.util.Set;
 public class CompositeCache implements Cache {
 
     static Logger logger = LogManager.getLogger(CompositeCache.class.getName());
-    //    @Inject
-//    DataCache mDataCache;
     @Inject
     FileCache mFileCache;
     ConnectionSource connectionSource;
     Dao<CachedItem, String> cacheDAO;
 
     public CompositeCache() throws SQLException {
-        String databaseUrl = "jdbc:h2:cached_item";
+        String databaseUrl = "jdbc:h2:/sdcard/sunturtle_1/cached_item.v1";
+//        String databaseUrl = "jdbc:h2:cached_item.v1";
         connectionSource = new JdbcConnectionSource(databaseUrl);
         TableUtils.createTableIfNotExists(connectionSource, CachedItem.class);
         cacheDAO = DaoManager.createDao(connectionSource, CachedItem.class);

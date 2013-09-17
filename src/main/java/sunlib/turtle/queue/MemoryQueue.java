@@ -34,7 +34,7 @@ public class MemoryQueue implements RequestQueue, Runnable {
     private Thread mThread;
 
     public MemoryQueue() {
-        File file = new File("task.db");
+        File file = new File("/sdcard/sunturtle_1/task.db");
         try {
             mRequests = new FileObjectQueue<ApiRequest>(file, new SerializedConverter<ApiRequest>());
         } catch (Exception e) {

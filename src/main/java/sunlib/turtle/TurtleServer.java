@@ -15,6 +15,7 @@ import sunlib.turtle.module.JavaModule;
 import sunlib.turtle.queue.RequestQueue;
 import sunlib.turtle.utils.ApiRequest;
 import sunlib.turtle.utils.ApiResponse;
+import sunlib.turtle.utils.SunWS;
 
 import java.io.FileInputStream;
 import java.util.Map;
@@ -50,10 +51,7 @@ public class TurtleServer extends NanoHTTPD {
         ApiResponse resp = null;
         Response ret = null;
         try {
-            ApiRequest req = new ApiRequest("127.0.0.1", -1, uri)
-                    .method(method)
-                    .params(parms)
-                    .headers(headers);
+            ApiRequest req = SunWS.url(uri).params(parms);
             req.type = categorizer.getType(method, uri, parms);
             logger.trace("request,{}", req);
             if (req.type == null) {
